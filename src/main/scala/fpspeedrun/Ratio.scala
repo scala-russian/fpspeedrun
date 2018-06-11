@@ -1,3 +1,5 @@
 package fpspeedrun
 
-final case class Ratio()
+final case class Ratio(){
+  def ===(that: Ratio): Boolean = ???
+}
