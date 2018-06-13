@@ -1,5 +1,7 @@
 package fpspeedrun
 
+import fpspeedrun.Ord.Compare
+import fpspeedrun.Ord.Compare._
 import syntax.eq._
 
 trait Eq[T] {
@@ -12,4 +14,20 @@ object Eq {
       first.size == second.size && first.zip(second).forall {
         case (x, y) => x === y
     }
+
+  implicit def orderList[T](implicit ord: Ord[T]): Ord[List[T]] = new Ord[List[T]] {
+    override def compare(first: List[T], second: List[T]): Compare = {
+      if (first.size < second.size) return LT
+      if (first.size > second.size) return GT
+      first
+        .zip(second)
+        .foldRight(EQ.asInstanceOf[Compare]) {
+          case ((x, y), eq) => if (ord.compare(x, y) != eq) ord.compare(x, y) else eq
+        }
+    }
+
+    override def ===(x: List[T], y: List[T]): Boolean = x.size == y.size && x.zip(y).forall {
+      case (a, b) => a === b
+    }
+  }
 }
