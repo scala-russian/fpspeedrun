@@ -22,10 +22,13 @@ object Eq {
       if (first.size > second.size) return GT
       first
         .zip(second)
-        .foldRight(EQ.asInstanceOf[Compare]) {
-          case ((x, y), EQ) => if ((x <> y) != EQ) x <> y else EQ
-          case (_, eq)      => eq
+        .find {
+          case (x, y) => (x <> y) != EQ
         }
+        .map {
+          case (x, y) => x <> y
+        }
+        .getOrElse(EQ)
     }
 
     override def ===(x: List[T], y: List[T]): Boolean = x.size == y.size && x.zip(y).forall {
