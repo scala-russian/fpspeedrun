@@ -1,5 +1,6 @@
 package fpspeedrun
 import fpspeedrun.Ord.Compare
+import fpspeedrun.syntax.ord._
 
 trait Ord[T] extends Eq[T] {
   def compare(x: T, y: T): Compare
@@ -21,10 +22,9 @@ object Ord {
   }
 
   implicit def ordSeq[T: Ord]: Ord[Seq[T]] = (x: Seq[T], y: Seq[T]) => {
-    val ord = implicitly[Ord[T]]
     x.zip(y)
-      .find { case (a, b) => ord.compare(a, b) != Compare.EQ }
-      .map { case (a, b) => ord.compare(a, b) }
+      .find { case (a, b) => (a <> b) != Compare.EQ }
+      .map { case (a, b) => a <> b }
       .getOrElse {
         (x.size, y.size) match {
           case (a, b) if a > b  => Compare.GT
