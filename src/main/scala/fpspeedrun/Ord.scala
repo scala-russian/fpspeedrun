@@ -1,13 +1,13 @@
 package fpspeedrun
 import fpspeedrun.Ord.Compare
 
-trait Ord[T] extends Eq[T]{
+trait Ord[T] extends Eq[T] {
   def compare(x: T, y: T): Compare
 }
 
-object Ord{
+object Ord {
   sealed trait Compare
-  object Compare{
+  object Compare {
     case object LT //less than
     case object EQ //equals to
     case object GT //greater than
