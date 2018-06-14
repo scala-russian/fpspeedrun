@@ -3,6 +3,7 @@ package fpspeedrun
 import fpspeedrun.Ord.Compare
 import fpspeedrun.Ord.Compare._
 import syntax.eq._
+import syntax.ord._
 
 trait Eq[T] {
   def ===(x: T, y: T): Boolean
@@ -22,7 +23,8 @@ object Eq {
       first
         .zip(second)
         .foldRight(EQ.asInstanceOf[Compare]) {
-          case ((x, y), eq) => if (ord.compare(x, y) != eq) ord.compare(x, y) else eq
+          case ((x, y), EQ) => if ((x <> y) != EQ) x <> y else EQ
+          case (_, eq)      => eq
         }
     }
 
