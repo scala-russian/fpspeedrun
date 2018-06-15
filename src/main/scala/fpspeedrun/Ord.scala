@@ -12,22 +12,29 @@ object Ord {
     case object LT extends Compare //less than
     case object EQ extends Compare //equals to
     case object GT extends Compare //greater than
-    case object UNDEFINED extends Compare
+  }
+
+  implicit val ordLong: Ord[Long] = new Ord[Long] {
+    override def compare(x: Long, y: Long): Compare = x - y match {
+      case 0                => Compare.EQ
+      case diff if diff > 0 => Compare.GT
+      case _                => Compare.LT
+    }
+
+    override def ===(x: Long, y: Long): Boolean = compare(x, y) == Compare.EQ
   }
 
   implicit def ordList[T](implicit ord: Ord[T]): Ord[Seq[T]] = new Ord[Seq[T]] {
 
-    override def compare(x: Seq[T], y: Seq[T]): Compare = {
-      if (x.size != y.size) {
-        return Compare.UNDEFINED
+    override def compare(x: Seq[T], y: Seq[T]): Compare =
+      x.size - y.size match {
+        case diff if diff > 0 => Compare.GT
+        case diff if diff < 0 => Compare.LT
+        case _ =>
+          x.zip(y)
+            .collectFirst { case (l, r) if (l <> r) != Compare.EQ => l <> r }
+            .getOrElse(Compare.EQ)
       }
-      x.zip(y)
-        .map {
-          case (l, r) => l <> r
-        }
-        .find(c => c != Compare.EQ)
-        .getOrElse(Compare.EQ)
-    }
 
     override def ===(x: Seq[T], y: Seq[T]): Boolean =
       compare(x, y) == Compare.EQ
