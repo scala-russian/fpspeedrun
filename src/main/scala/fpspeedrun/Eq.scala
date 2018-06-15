@@ -22,11 +22,8 @@ object Eq {
       if (first.size > second.size) return GT
       first
         .zip(second)
-        .find {
-          case (x, y) => (x <> y) != EQ
-        }
-        .map {
-          case (x, y) => x <> y
+        .collectFirst {
+          case (x, y) if (x <> y) != EQ => x <> y
         }
         .getOrElse(EQ)
     }
