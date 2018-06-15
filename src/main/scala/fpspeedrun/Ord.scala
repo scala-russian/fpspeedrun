@@ -23,8 +23,7 @@ object Ord {
 
   implicit def ordSeq[T: Ord]: Ord[Seq[T]] = (x: Seq[T], y: Seq[T]) => {
     x.zip(y)
-      .find { case (a, b) => (a <> b) != Compare.EQ }
-      .map { case (a, b) => a <> b }
+      .collectFirst { case (a, b) if (a <> b) != Compare.EQ => a <> b }
       .getOrElse {
         (x.size, y.size) match {
           case (a, b) if a > b  => Compare.GT
