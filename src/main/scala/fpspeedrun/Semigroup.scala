@@ -10,9 +10,12 @@ trait Semigroup[T] {
   def combine(x: T, y: T): T
 }
 
+object Semigroup extends StdSemigroupInstances
+
+
 final case class Sum[T](value: T) extends AnyVal with Wrapper[T]
 
-object Sum extends StdSemigroupInstances {
+object Sum{
   implicit def sumSemigroup[T: Num]: Semigroup[Sum[T]] = (x, y) => Sum(x.value + y.value)
   implicit def iso[A]: WrapperIso[A, Sum] = Sum(_)
 }
@@ -38,6 +41,4 @@ object Last {
   implicit def iso[A]: WrapperIso[A, Last] = Last(_)
 }
 
-trait StdSemigroupInstances {
-  final implicit val stringSemigroup: Semigroup[String] = _ + _
-}
+trait StdSemigroupInstances extends StdMonoidInstances[Semigroup]

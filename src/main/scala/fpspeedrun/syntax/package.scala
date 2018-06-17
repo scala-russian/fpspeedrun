@@ -46,3 +46,5 @@ object semigroup extends Semigroup.ToSemigroupOps {
     def last: Last[T] = Last(x)
   }
 }
+
+object monoid extends Monoid.ToMonoidOps
