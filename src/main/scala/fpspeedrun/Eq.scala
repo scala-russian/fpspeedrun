@@ -13,6 +13,12 @@ trait Eq[T] {
 }
 
 object Eq {
+  object laws {
+    def symmetry[T: Eq](x: T, y: T): Boolean           = (x === y) == (y === x)
+    def transitivity[T: Eq](x: T, y: T, z: T): Boolean = !((x === y) && (y === z)) || (x === z)
+    def reflectivity[T: Eq](x: T): Boolean             = x === x
+  }
+
   implicit def compareList[T](implicit eq: Eq[T]): Eq[List[T]] =
     (first, second) =>
       first.size == second.size && first.zip(second).forall {
