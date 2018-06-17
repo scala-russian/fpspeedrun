@@ -2,6 +2,7 @@ package fpspeedrun.lesson_1
 
 import fpspeedrun.lesson_1.Ord.Compare
 import fpspeedrun.lesson_1.Ord.Compare.{EQ, GT, LT}
+import fpspeedrun.syntax.ord._
 
 trait Ord[T] extends Eq[T] {
   def <>(x: T, y: T): Compare
@@ -17,13 +18,13 @@ object Ord {
     case object GT extends Compare
   }
 
-  implicit def compareSeq[T](implicit ord: Ord[T]): Ord[Seq[T]] =
+  implicit def compareSeq[T : Ord]: Ord[Seq[T]] =
     (x: Seq[T], y: Seq[T]) =>
       x.lengthCompare(y.size) match {
         case v if v > 0 => GT
         case v if v < 0 => LT
         case _ => (x zip y).collectFirst {
-          case (l, r) if ord.<>(l, r) != EQ => ord.<>(l, r)
+          case (l, r) if (l <> r) != EQ  => l <> r
         }.getOrElse(EQ)
       }
 }
