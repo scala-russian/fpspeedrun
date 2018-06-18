@@ -9,25 +9,26 @@ import syntax.ord._
 import syntax.eq._
 
 class MonoidSuite extends WordSpec with Matchers with PropertyChecks {
-  "monoid syntax extension for list" when {
-    "requesting empty element" should {
-      "yield empty string" in {
-        mempty[String] shouldBe ""
-      }
-
-      "yield empty list" in {
-        mempty[List[Double]] shouldBe List.empty
-      }
-
-      "yield empty sum" in {
-        mempty[Sum[Double]] shouldBe Sum(0.0)
-      }
-
-      "yield empty prod" in {
-        mempty[Prod[Double]] shouldBe Sum(1.0)
-      }
+  "requesting empty element" should {
+    "yield empty string" in {
+      mempty[String] shouldBe ""
     }
 
+    "yield empty list" in {
+      mempty[List[Double]] shouldBe List.empty
+    }
+
+    "yield empty sum" in {
+      mempty[Sum[Double]] shouldBe Sum(0.0)
+    }
+
+    "yield empty prod" in {
+      mempty[Prod[Double]] shouldBe Sum(1.0)
+    }
+  }
+
+
+  "monoid syntax extension for list" when {
     "folding strings" should {
       "concat list" in forAll(
         (xs                      : List[String]) => xs.foldAll shouldBe xs.mkString)
