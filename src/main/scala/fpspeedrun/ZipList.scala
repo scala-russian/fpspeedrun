@@ -8,11 +8,12 @@ object ZipList {
   final case class Repeat[A](single: A) extends ZipList[A] {
     override def value = Left(single)
   }
-  final case class Final[A](list: List[A]) extends ZipList[A] {
+  final case class Finite[A](list: List[A]) extends ZipList[A] {
     override def value = Right(list)
   }
 
-  def apply[A](list: List[A]): ZipList[A] = Final(list)
+  def apply[A](list: List[A]): ZipList[A] = Finite(list)
+  def repeat[A](value: A): ZipList[A] = Repeat(value)
 
   implicit def zipListSemigroup[A: Semigroup]: Semigroup[ZipList[A]] = ???
 

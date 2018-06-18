@@ -71,4 +71,5 @@ object Ord extends StdOrdInstances[Ord] {
 
 trait StdOrdInstances[TC[t] >: Ord[t]] extends StdNumInstances[TC]{
   final implicit val stringOrd: TC[String] = byOrdering
+  final implicit def optionOrd[A: Ord]: TC[Option[A]] = ???
 }
