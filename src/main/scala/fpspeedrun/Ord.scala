@@ -28,7 +28,7 @@ object Ord extends StdOrdInstances[Ord] {
   import ops._
 
   sealed trait Compare
-  object Compare{
+  object Compare {
     case object LT extends Compare //less than
     case object EQ extends Compare //equals to
     case object GT extends Compare //greater than
@@ -41,24 +41,33 @@ object Ord extends StdOrdInstances[Ord] {
   @tailrec def compareLists[T: Ord](xs: List[T], ys: List[T]): Compare =
     xs match {
       case Nil => if (ys.isEmpty) EQ else LT
-      case x :: xtail => ys match {
-        case Nil => GT
-        case y :: ytail =>
-          val res: Compare = x compare y
-          if (res =/= EQ) res else compareLists(xtail, ytail)
-      }
+      case x :: xtail =>
+        ys match {
+          case Nil => GT
+          case y :: ytail =>
+            val res: Compare = x compare y
+            if (res =/= EQ) res else compareLists(xtail, ytail)
+        }
     }
 
   implicit def listOrd[T: Ord]: Ord[List[T]] = compareLists
 
-  implicit def vectorOrd[T: Ord]: Ord[Vector[T]] = (xs, ys) =>
-    (xs.iterator zip ys.iterator).map((Ord[T].compare _).tupled).find(_ =/= EQ).getOrElse(xs.size <=> ys.size)
+  implicit def vectorOrd[T: Ord]: Ord[Vector[T]] =
+    (xs, ys) =>
+      (xs.iterator zip ys.iterator)
+        .map((Ord[T].compare _).tupled)
+        .find(_ =/= EQ)
+        .getOrElse(xs.size <=> ys.size)
 
-  implicit def seqOrd[T: Ord]: Ord[Seq[T]] = (xs, ys) =>
-    (xs, ys).zipped.collectFirst { case Compared(cmp) if cmp =/= EQ => cmp }.getOrElse(xs.size <=> ys.size)
+  implicit def seqOrd[T: Ord]: Ord[Seq[T]] =
+    (xs, ys) =>
+      (xs, ys).zipped
+        .collectFirst { case Compared(cmp) if cmp =/= EQ => cmp }
+        .getOrElse(xs.size <=> ys.size)
 
   object Compared {
-    def unapply[T: Ord](pair: (T, T)): Matched[Compare] = Matched(Ord[T].compare(pair._1, pair._2))
+    def unapply[T: Ord](pair: (T, T)): Matched[Compare] =
+      Matched(Ord[T].compare(pair._1, pair._2))
   }
 
   class FromOrdering[T](implicit ord: Ordering[T]) extends Ord[T] {
@@ -69,7 +78,20 @@ object Ord extends StdOrdInstances[Ord] {
   }
 }
 
-trait StdOrdInstances[TC[t] >: Ord[t]] extends StdNumInstances[TC]{
+trait StdOrdInstances[TC[t] >: Ord[t]] extends StdNumInstances[TC] {
+  import Ord.ops._
+
   final implicit val stringOrd: TC[String] = byOrdering
-  final implicit def optionOrd[A: Ord]: TC[Option[A]] = ???
+
+  final implicit val doubleOrd: TC[Double] = byOrdering
+
+  final implicit def optionOrd[A](implicit ev$1: Ord[A]): TC[Option[A]] =
+    new Ord[Option[A]] {
+      override def compare(x: Option[A], y: Option[A]): Compare = (x, y) match {
+        case (None, None)         => EQ
+        case (None, Some(_))      => LT
+        case (Some(_), None)      => GT
+        case (Some(xx), Some(yy)) => xx <=> yy
+      }
+    }
 }
