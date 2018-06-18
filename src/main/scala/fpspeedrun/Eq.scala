@@ -1,4 +1,5 @@
 package fpspeedrun
+import fpspeedrun.Eq.ops
 import simulacrum.{op, typeclass}
 
 import scala.annotation.tailrec
@@ -28,7 +29,7 @@ object Eq extends StdEqInstances {
         case Nil => ys.isEmpty
         case x :: xt =>
           ys match {
-            case Nil => false
+            case Nil     => false
             case y :: yt => x === y && go(xt, yt)
           }
       }
@@ -36,6 +37,18 @@ object Eq extends StdEqInstances {
   }
 }
 
-trait StdEqInstances extends StdOrdInstances[Eq]{
-  implicit def eitherEq[A: Eq, B: Eq]: Eq[Either[A, B]] = ???
+trait StdEqInstances extends StdOrdInstances[Eq] {
+  import ops._
+
+  implicit def eitherEq[A: Eq, B: Eq]: Eq[Either[A, B]] =
+    (a: Either[A, B], b: Either[A, B]) => a.left == b.left && a.right == b.right
+
+  implicit def optionEq[A: Eq]: Eq[Option[A]] =
+    (x: Option[A], y: Option[A]) =>
+      (x, y) match {
+        case (None, Some(_))      => false
+        case (None, None)         => true
+        case (Some(_), None)      => false
+        case (Some(xx), Some(yy)) => xx === yy
+    }
 }
