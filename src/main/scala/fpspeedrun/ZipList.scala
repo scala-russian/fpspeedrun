@@ -4,8 +4,6 @@ import fpspeedrun.Ord._
 import Eq.ops._
 import Semigroup.ops._
 import Ord.ops._
-import Num.ops._
-import Frac.ops._
 
 trait ZipList[A] {
   def value: Either[A, List[A]]
@@ -68,7 +66,7 @@ object ZipList {
         ZipList.Repeat(n.fromInt(x))
 
       override def plus(x: ZipList[A], y: ZipList[A]): ZipList[A] =
-        x.zipWith(y)(_ + _)
+        x.zipWith(y)(n.plus)
 
       override def times(x: ZipList[A], y: ZipList[A]): ZipList[A] =
         x.zipWith(y)(n.times)
@@ -77,12 +75,12 @@ object ZipList {
         x.value match {
           case Left(xx) =>
             y.value match {
-              case Left(yy)  => n.compare(xx, yy) // xx <=> yy
-              case Right(ys) => n.compare(xx, ys.head) // xx <=> ys.head
+              case Left(yy)  => xx <=> yy
+              case Right(ys) => xx <=> ys.head
             }
           case Right(xx: List[A]) =>
             y.value match {
-              case Left(yy)           => n.compare(xx.head, yy) // xx.head <=> yy
+              case Left(yy)           => xx.head <=> yy
               case Right(ys: List[A]) => xx <=> ys
             }
         }
@@ -98,7 +96,7 @@ object ZipList {
         ZipList.Repeat(i.fromInt(x))
 
       override def plus(x: ZipList[A], y: ZipList[A]): ZipList[A] =
-        x.zipWith(y)(_ + _)
+        x.zipWith(y)(i.plus)
 
       override def times(x: ZipList[A], y: ZipList[A]): ZipList[A] =
         x.zipWith(y)(i.times)
@@ -107,7 +105,7 @@ object ZipList {
         x.value match {
           case Left(xx) =>
             y.value match {
-              case Left(yy)  => i.compare(xx, yy)
+              case Left(yy)  => xx <=> yy
               case Right(ys) => i.compare(xx, ys.head)
             }
           case Right(xs: List[A]) =>
@@ -121,7 +119,7 @@ object ZipList {
   implicit def zipListFrac[A](implicit f: Frac[A]): Frac[ZipList[A]] =
     new Frac[ZipList[A]] {
       override def div(x: ZipList[A], y: ZipList[A]): ZipList[A] =
-        x.zipWith(y)(_ / _)
+        x.zipWith(y)(f.div)
 
       override def fromInt(x: Int): ZipList[A] = ZipList.Repeat(f.fromInt(x))
 
@@ -135,12 +133,12 @@ object ZipList {
         x.value match {
           case Left(xx) =>
             y.value match {
-              case Left(yy)  => f.compare(xx, yy) // xx <=> yy
-              case Right(ys) => f.compare(xx, ys.head) // xx <=> ys.head
+              case Left(yy)  => xx <=> yy
+              case Right(ys) => xx <=> ys.head
             }
           case Right(xx: List[A]) =>
             y.value match {
-              case Left(yy)           => f.compare(xx.head, yy) // xx.head <=> yy
+              case Left(yy)           => xx.head <=> yy
               case Right(ys: List[A]) => xx <=> ys
             }
         }
