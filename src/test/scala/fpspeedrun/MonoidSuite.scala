@@ -27,36 +27,35 @@ class MonoidSuite extends WordSpec with Matchers with PropertyChecks {
     }
   }
 
-
   "monoid syntax extension for list" when {
     "folding strings" should {
       "concat list" in forAll(
-        (xs                      : List[String]) => xs.foldAll shouldBe xs.mkString)
+        (xs: List[String]) => xs.foldAll shouldBe xs.mkString)
       "concat ints" in forAll(
-        (xs                      : List[Int]) => xs.foldMap(_.toString) shouldBe xs.mkString)
+        (xs: List[Int]) => xs.foldMap(_.toString) shouldBe xs.mkString)
     }
 
     "folding lists" should {
       "concat list" in forAll(
-        (xss                     : List[List[String]]) => xss.foldAll shouldBe xss.flatten)
+        (xss: List[List[String]]) => xss.foldAll shouldBe xss.flatten)
       "concat ints" in forAll(
-        (xs                      : List[Int]) => xs.foldMap(List(_)) shouldBe xs)
+        (xs: List[Int]) => xs.foldMap(List(_)) shouldBe xs)
     }
 
     "adding big integers" should {
       "calculate foldVia" in forAll(
-        (xs                        : List[BigInt]) => xs.foldVia[Sum] shouldBe xs.sum)
+        (xs: List[BigInt]) => xs.foldVia[Sum] shouldBe xs.sum)
 
       "calculate foldMap" in forAll(
-        (xs                      : List[BigInt]) => xs.foldMap(Sum(_)) shouldBe Sum(xs.sum))
+        (xs: List[BigInt]) => xs.foldMap(Sum(_)) shouldBe Sum(xs.sum))
     }
 
     "multiplying big integers" should {
       "calculate foldVia" in forAll(
-        (xs                            : List[BigInt]) => xs.foldVia[Prod] shouldBe xs.product)
+        (xs: List[BigInt]) => xs.foldVia[Prod] shouldBe xs.product)
 
       "calculate foldMap" in forAll(
-        (xs                      : List[BigInt]) => xs.foldMap(Prod(_)) shouldBe Prod(xs.product))
+        (xs: List[BigInt]) => xs.foldMap(Prod(_)) shouldBe Prod(xs.product))
     }
 
     "combining endos" should {
@@ -84,29 +83,38 @@ class MonoidSuite extends WordSpec with Matchers with PropertyChecks {
     }
 
     "zip-add integers" in {
-      forAll((xs: List[Int], ys: List[Int]) =>
-        (ZipList(xs) + ZipList(ys)) shouldBe ZipList((xs, ys).zipped.map(_ + _))
-      )
+      forAll(
+        (xs: List[Int], ys: List[Int]) =>
+          (ZipList(xs) + ZipList(ys)) shouldBe ZipList(
+            (xs, ys).zipped.map(_ + _)))
     }
 
     "zip-multiply integers" in {
-      forAll((xs: List[Int], ys: List[Int]) =>
-        (ZipList(xs) * ZipList(ys)) shouldBe ZipList((xs, ys).zipped.map(_ * _)))
+      forAll(
+        (xs: List[Int], ys: List[Int]) =>
+          (ZipList(xs) * ZipList(ys)) shouldBe ZipList(
+            (xs, ys).zipped.map(_ * _)))
     }
 
     "zip-quotient integers" in {
-      forAll((xs: List[Int], ys: List[Int]) =>
-        (ZipList(xs) / ZipList(ys)) shouldBe ZipList((xs, ys).zipped.map(_ / _)))
+      forAll(
+        (xs: List[Int], ys: List[Int]) =>
+          (ZipList(xs) / ZipList(ys)) shouldBe ZipList(
+            (xs, ys).zipped.map(_ / _)))
     }
 
     "zip-mod integers" in {
-      forAll((xs: List[Int], ys: List[Int]) =>
-        (ZipList(xs) % ZipList(ys)) shouldBe ZipList((xs, ys).zipped.map(_ % _)))
+      forAll(
+        (xs: List[Int], ys: List[Int]) =>
+          (ZipList(xs) % ZipList(ys)) shouldBe ZipList(
+            (xs, ys).zipped.map(_ % _)))
     }
 
     "zip-divide doubles" in {
-      forAll((xs: List[Double], ys: List[Double]) =>
-        (ZipList(xs) / ZipList(ys)) shouldBe ZipList((xs, ys).zipped.map(_ / _)))
+      forAll(
+        (xs: List[Double], ys: List[Double]) =>
+          (ZipList(xs) / ZipList(ys)) shouldBe ZipList(
+            (xs, ys).zipped.map(_ / _)))
     }
   }
 }
