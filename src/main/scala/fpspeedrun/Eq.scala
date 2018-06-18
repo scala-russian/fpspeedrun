@@ -9,7 +9,7 @@ trait Eq[T] {
   def equal(x: T, y: T): Boolean
 
   @op("=/=", alias = true)
-  def notEqual(x: T, y: T): Boolean = ! equal(x, y)
+  def notEqual(x: T, y: T): Boolean = !equal(x, y)
 }
 
 object Eq extends StdEqInstances {
@@ -28,7 +28,7 @@ object Eq extends StdEqInstances {
         case Nil => ys.isEmpty
         case x :: xt =>
           ys match {
-            case Nil     => false
+            case Nil => false
             case y :: yt => x === y && go(xt, yt)
           }
       }
@@ -36,5 +36,6 @@ object Eq extends StdEqInstances {
   }
 }
 
-
-trait StdEqInstances extends StdOrdInstances[Eq]
+trait StdEqInstances extends StdOrdInstances[Eq]{
+  implicit def eitherEq[A: Eq, B: Eq]: Eq[Either[A, B]] = ???
+}
