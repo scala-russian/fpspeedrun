@@ -11,8 +11,12 @@ object Iso {
     def value: T
   }
 
-  trait WrapperIso[T, F[x] <: Wrapper[x]] extends Iso[T, F[T]] {
-    override def unwrap(b: F[T]): T = b.value
+  trait WrapperCompanion[F[x] <: Wrapper[x]]{
+    def apply[T](x: T): F[T]
+    implicit def wrapperIso[T]: Iso[T, F[T]] = new Iso[T, F[T]]{
+      override def wrap(a: T): F[T] = apply(a)
+      override def unwrap(b: F[T]): T = b.value
+    }
   }
 }
 

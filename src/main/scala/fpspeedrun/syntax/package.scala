@@ -1,7 +1,6 @@
 package fpspeedrun.syntax
 import fpspeedrun._
 
-
 object eq extends Eq.ToEqOps
 
 object ord extends Ord.ToOrdOps
@@ -21,6 +20,7 @@ object frac extends Frac.ToFracOps
 object ratio {
   implicit class RatioOps[T](val x: T) extends AnyVal {
     def \\(y: T)(implicit int: Integ[T]): Ratio[T] = Ratio.make(x, y)
+    def toRatio(implicit int: Integ[T]): Ratio[T] = Ratio.make(x, int.one)
   }
 }
 
