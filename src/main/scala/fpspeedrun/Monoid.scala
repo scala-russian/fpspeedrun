@@ -3,7 +3,10 @@ import simulacrum.typeclass
 import syntax.semigroup._
 
 @typeclass
-trait Monoid[A] extends Semigroup[A] with Pointed[A]
+trait Monoid[A] extends Semigroup[A] with Default[A]{
+  def empty: A
+  override def default: A = empty
+}
 
 object Monoid extends StdMonoidInstances[Monoid] {
   implicit def optionMonoid[T: Semigroup]: Monoid[Option[T]] = new Monoid[Option[T]] {

@@ -1,8 +1,8 @@
 package fpspeedrun
 import simulacrum.typeclass
 
-
+/** Pointed type */
 @typeclass
-trait Pointed[A] {
-  def empty: A
+trait Default[A] {
+  def default: A
 }
