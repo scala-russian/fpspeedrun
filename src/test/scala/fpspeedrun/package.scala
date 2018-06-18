@@ -1,0 +1,1 @@
+package object fpspeedrun extends RatioGenerators
