@@ -18,7 +18,7 @@ object Monoid extends StdMonoidInstances[Monoid] {
 }
 
 
-final case class Endo[A](f: A => A) extends AnyVal
+final case class Endo[A](run: A => A) extends AnyVal
 
 object Endo{
   implicit def endoMonoid[A]: Monoid[Endo[A]] = ???

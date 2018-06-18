@@ -20,7 +20,7 @@ object ZipList {
 
   implicit def zipListInteg[A: Integ]: Integ[ZipList[A]] = ???
 
-  implicit def zipListFrac[A: Integ]: Frac[ZipList[A]] = ???
+  implicit def zipListFrac[A: Frac]: Frac[ZipList[A]] = ???
 }
 
 

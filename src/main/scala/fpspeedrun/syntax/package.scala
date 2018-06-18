@@ -53,6 +53,6 @@ object monoid extends Monoid.ToMonoidOps{
 
     def foldMap[B: Monoid](f: A => B): B = ???
 
-    def foldVia[F[_]](implicit iso: Iso[A, F[A]], mon: Monoid[A]): A = ???
+    def foldVia[F[_]](implicit iso: Iso[A, F[A]], mon: Monoid[F[A]]): A = ???
   }
 }
