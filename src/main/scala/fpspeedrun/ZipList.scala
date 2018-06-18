@@ -1,12 +1,18 @@
 package fpspeedrun
 
-final case class ZipList[A](list: List[A]) extends AnyVal
+trait ZipList[A] {
+  def value: Either[A, List[A]]
+}
 
 object ZipList {
-  implicit def iso[A]: Iso[List[A], ZipList[A]] = new Iso[List[A], ZipList[A]] {
-    override def wrap(a: List[A]): ZipList[A] = ZipList(a)
-    override def unwrap(b: ZipList[A]): List[A] = b.list
+  final case class Repeat[A](single: A) extends ZipList[A] {
+    override def value = Left(single)
   }
+  final case class Final[A](list: List[A]) extends ZipList[A] {
+    override def value = Right(list)
+  }
+
+  def apply[A](list: List[A]): ZipList[A] = Final(list)
 
   implicit def zipListSemigroup[A: Semigroup]: Semigroup[ZipList[A]] = ???
 
@@ -22,5 +28,3 @@ object ZipList {
 
   implicit def zipListFrac[A: Frac]: Frac[ZipList[A]] = ???
 }
-
-
