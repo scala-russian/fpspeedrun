@@ -17,14 +17,14 @@ class OrdSuite extends WordSpec with Matchers with PropertyChecks {
 
   "ZipList comparison" should {
     "make smallest repeated smallest ziplist" in {
-      forAll((xs: List[Double]) =>
-        (ZipList.repeat(0.0) <=> ZipList(xs.map(_.abs + 1))) shouldBe LT
+      forAll((x: Double, xs: List[Double]) =>
+        (ZipList.repeat(0.0) <=> ZipList((x :: xs).map(_.abs + 1))) shouldBe LT
       )
     }
 
     "make larges repeated largest ziplist" in {
-      forAll((xs: List[Double]) =>
-        (ZipList.repeat(0.0) <=> ZipList(xs.map(-_.abs - 1))) shouldBe GT
+      forAll((x: Double, xs: List[Double]) =>
+        (ZipList.repeat(0.0) <=> ZipList((x :: xs).map(-_.abs - 1))) shouldBe GT
       )
     }
 
