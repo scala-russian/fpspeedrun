@@ -7,7 +7,7 @@ object ord extends Ord.ToOrdOps
 
 object num extends Num.ToNumOps {
   def zero[T: Num]: T = Num[T].zero
-  def one[T: Num]: T = Num[T].zero
+  def one[T: Num]: T = Num[T].one
   implicit class IntNumOps(val x: Int) extends AnyVal {
     def toNum[T](implicit num: Num[T]): T = num.fromInt(x)
   }
