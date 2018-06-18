@@ -20,9 +20,9 @@ object ZipList {
 
   implicit def zipListMonoid[A: Monoid]: Monoid[ZipList[A]] = ???
 
-  implicit def zipListEq[A: Eq]: Eq[ZipList[A]] =
+  implicit def zipListEq[A: Eq]: Eq[ZipList[A]] = ???
 
-  implicit def zipListOrd[A: Ord]: Ord[ZipList[A]] = _.list compare _.list
+  implicit def zipListOrd[A: Ord]: Ord[ZipList[A]] = ???
 
   implicit def zipListNum[A: Num]: Num[ZipList[A]] = ???
 

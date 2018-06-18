@@ -37,5 +37,10 @@ object Eq extends StdEqInstances {
 }
 
 trait StdEqInstances extends StdOrdInstances[Eq]{
-  implicit def eitherEq[A: Eq, B: Eq]: Eq[Either[A, B]] = ???
+  import Eq.ops._
+  implicit def eitherEq[A: Eq, B: Eq]: Eq[Either[A, B]] = {
+    case (Left(x), Left(y)) => x === y
+    case (Right(x), Right(y)) => x === y
+    case _ => false
+  }
 }
