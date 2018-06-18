@@ -97,24 +97,27 @@ class MonoidSuite extends WordSpec with Matchers with PropertyChecks {
     }
 
     "zip-quotient integers" in {
-      forAll(
-        (xs: List[Int], ys: List[Int]) =>
-          (ZipList(xs) / ZipList(ys)) shouldBe ZipList(
-            (xs, ys).zipped.map(_ / _)))
+      forAll { (xs: List[Int], ysz: List[Int]) =>
+        val ys = ysz.filter(_ =/= zero[Int])
+
+        (ZipList(xs) / ZipList(ys)) shouldBe ZipList((xs, ys).zipped.map(_ / _))
+      }
     }
 
     "zip-mod integers" in {
-      forAll(
-        (xs: List[Int], ys: List[Int]) =>
-          (ZipList(xs) % ZipList(ys)) shouldBe ZipList(
-            (xs, ys).zipped.map(_ % _)))
+      forAll { (xs: List[Int], ysz: List[Int]) =>
+        val ys = ysz.filter(_ =/= zero[Int])
+
+        (ZipList(xs) % ZipList(ys)) shouldBe ZipList((xs, ys).zipped.map(_ % _))
+      }
     }
 
     "zip-divide doubles" in {
-      forAll(
-        (xs: List[Double], ys: List[Double]) =>
-          (ZipList(xs) / ZipList(ys)) shouldBe ZipList(
-            (xs, ys).zipped.map(_ / _)))
+      forAll { (xs: List[Double], ysz: List[Double]) =>
+        val ys = ysz.filter(_ =/= zero[Double])
+
+        (ZipList(xs) / ZipList(ys)) shouldBe ZipList((xs, ys).zipped.map(_ / _))
+      }
     }
   }
 }
