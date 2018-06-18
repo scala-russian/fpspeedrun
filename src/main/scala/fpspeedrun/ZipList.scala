@@ -26,9 +26,9 @@ object ZipList {
 
   implicit def zipListOrd[A: Ord]: Ord[ZipList[A]] = {
     case (Repeat(x), Repeat(y)) => x compare y
-    case (Repeat(x), Final(y)) => y.view.map(x compare _).find(_ =/= EQ).getOrElse(EQ)
-    case (Final(x), Repeat(y)) => x.view.map(_ compare y).find(_ =/= EQ).getOrElse(EQ)
-    case (Final(x), Final(y)) => x compare y
+    case (Repeat(x), Finite(y)) => y.view.map(x compare _).find(_ =/= EQ).getOrElse(EQ)
+    case (Finite(x), Repeat(y)) => x.view.map(_ compare y).find(_ =/= EQ).getOrElse(EQ)
+    case (Finite(x), Finite(y)) => x compare y
   }
 
   implicit def zipListNum[A: Num]: Num[ZipList[A]] = ???
