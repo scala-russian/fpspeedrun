@@ -70,17 +70,17 @@ class MonoidSuite extends WordSpec with Matchers with PropertyChecks {
   "composing zipLists" should {
     "zip-strict-compare integers" in {
       forAll((xs: List[Int], ys: List[Int]) =>
-        (ZipList(xs) equal ZipList(ys)) shouldBe ZipList((xs, ys).zipped.map(_ equal _)))
+        (ZipList(xs) equal ZipList(ys)) shouldBe (xs equal ys))
     }
 
     "zip-strict-compare strings" in {
       forAll((xs: List[String], ys: List[String]) =>
-        (ZipList(xs) equal ZipList(ys)) shouldBe ZipList((xs, ys).zipped.map(_ equal _)))
+        (ZipList(xs) equal ZipList(ys)) shouldBe (xs equal ys))
     }
 
     "zip-fuzzy-compare integers" in {
       forAll((xs: List[Int], ys: List[Int]) =>
-        (ZipList(xs) <=> ZipList(ys)) shouldBe ZipList((xs, ys).zipped.map(_ <=> _)))
+        (ZipList(xs) <=> ZipList(ys)) shouldBe (xs compare ys))
     }
 
     "zip-add integers" in {
