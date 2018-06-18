@@ -8,7 +8,7 @@ trait Eq[T] {
   @op("===", alias = true)
   def equal(x: T, y: T): Boolean
 
-  @op("=/=")
+  @op("=/=", alias = true)
   def notEqual(x: T, y: T): Boolean = ! equal(x, y)
 }
 
