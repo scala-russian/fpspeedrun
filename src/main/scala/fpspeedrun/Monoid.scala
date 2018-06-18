@@ -22,7 +22,10 @@ object Monoid extends StdMonoidInstances[Monoid] {
 final case class Endo[A](run: A => A) extends AnyVal
 
 object Endo{
-  implicit def endoMonoid[A]: Monoid[Endo[A]] = ???
+  implicit def endoMonoid[A]: Monoid[Endo[A]] = new Monoid[Endo[A]] {
+    override def empty: Endo[A] = Endo(identity)
+    override def combine(x: Endo[A], y: Endo[A]): Endo[A] = Endo(x.run andThen y.run)
+  }
 }
 
 final case class Sum[T](value: T) extends AnyVal with Wrapper[T]
