@@ -15,6 +15,8 @@ trait Eq[T] {
 object Eq extends StdEqInstances {
   import ops._
 
+  def fromEquals[A]: Eq[A] = _ == _
+
   /** простой вариант */
   implicit def vectorEq[A: Eq]: Eq[Vector[A]] =
     (xs, ys) => xs.view.zip(ys).forall { case (x, y) => x === y }
@@ -33,5 +35,6 @@ object Eq extends StdEqInstances {
     go
   }
 }
+
 
 trait StdEqInstances extends StdOrdInstances[Eq]

@@ -2,6 +2,7 @@ package fpspeedrun
 import fpspeedrun.Ord.{Compare, byOrdering}
 import fpspeedrun.Ord.Compare.{EQ, GT, LT}
 import simulacrum.{op, typeclass}
+import syntax.eq._
 
 import scala.annotation.tailrec
 import scala.collection.immutable.Seq
@@ -14,23 +15,25 @@ trait Ord[T] extends Eq[T] {
   override def equal(x: T, y: T): Boolean = compare(x, y) == EQ
 
   @op(">")
-  def gt(x: T, y: T): Boolean = compare(x, y) == GT
+  def gt(x: T, y: T): Boolean = compare(x, y) === GT
   @op("<")
-  def lt(x: T, y: T): Boolean = compare(x, y) == LT
+  def lt(x: T, y: T): Boolean = compare(x, y) === LT
   @op(">=")
-  def gte(x: T, y: T): Boolean = compare(x, y) != LT
+  def gte(x: T, y: T): Boolean = compare(x, y) =/= LT
   @op("<=")
-  def lte(x: T, y: T): Boolean = compare(x, y) != GT
+  def lte(x: T, y: T): Boolean = compare(x, y) =/= GT
 }
 
 object Ord extends StdOrdInstances[Ord] {
   import ops._
 
   sealed trait Compare
-  object Compare {
+  object Compare{
     case object LT extends Compare //less than
     case object EQ extends Compare //equals to
     case object GT extends Compare //greater than
+
+    implicit val eq: Eq[Compare] = Eq.fromEquals
   }
 
   def byOrdering[T: Ordering]: Ord[T] = new FromOrdering[T]
@@ -41,18 +44,18 @@ object Ord extends StdOrdInstances[Ord] {
       case x :: xtail => ys match {
         case Nil => GT
         case y :: ytail =>
-          val res = x <=> y
-          if (res != EQ) res else compareLists(xtail, ytail)
+          val res: Compare = x compare y
+          if (res =/= EQ) res else compareLists(xtail, ytail)
       }
     }
 
   implicit def listOrd[T: Ord]: Ord[List[T]] = compareLists
 
   implicit def vectorOrd[T: Ord]: Ord[Vector[T]] = (xs, ys) =>
-    (xs.iterator zip ys.iterator).map((Ord[T].compare _).tupled).find(_ != EQ).getOrElse(xs.size <=> ys.size)
+    (xs.iterator zip ys.iterator).map((Ord[T].compare _).tupled).find(_ =/= EQ).getOrElse(xs.size <=> ys.size)
 
   implicit def seqOrd[T: Ord]: Ord[Seq[T]] = (xs, ys) =>
-    (xs, ys).zipped.collectFirst { case Compared(cmp) if cmp != EQ => cmp }.getOrElse(xs.size <=> ys.size)
+    (xs, ys).zipped.collectFirst { case Compared(cmp) if cmp =/= EQ => cmp }.getOrElse(xs.size <=> ys.size)
 
   object Compared {
     def unapply[T: Ord](pair: (T, T)): Matched[Compare] = Matched(Ord[T].compare(pair._1, pair._2))
