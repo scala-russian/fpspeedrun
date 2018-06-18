@@ -1,7 +1,7 @@
 package fpspeedrun
 import org.scalatest.prop.PropertyChecks
 import org.scalatest.{Matchers, WordSpec}
-import syntax.monoid._
+import syntax.monoid.{empty => mempty, _}
 import syntax.frac._
 import syntax.integ._
 import syntax.num._
@@ -10,18 +10,36 @@ import syntax.eq._
 
 class MonoidSuite extends WordSpec with Matchers with PropertyChecks {
   "monoid syntax extension for list" when {
+    "requesting empty element" should {
+      "yield empty string" in {
+        mempty[String] shouldBe ""
+      }
+
+      "yield empty list" in {
+        mempty[List[Double]] shouldBe List.empty
+      }
+
+      "yield empty sum" in {
+        mempty[Sum[Double]] shouldBe Sum(0.0)
+      }
+
+      "yield empty prod" in {
+        mempty[Prod[Double]] shouldBe Sum(1.0)
+      }
+    }
+
     "folding strings" should {
       "concat list" in forAll(
         (xs                      : List[String]) => xs.foldAll shouldBe xs.mkString)
       "concat ints" in forAll(
-        (xs: List[Int]) => xs.foldMap(_.toString) shouldBe xs.mkString)
+        (xs                      : List[Int]) => xs.foldMap(_.toString) shouldBe xs.mkString)
     }
 
     "folding lists" should {
       "concat list" in forAll(
-        (xss: List[List[String]]) => xss.foldAll shouldBe xss.flatten)
+        (xss                     : List[List[String]]) => xss.foldAll shouldBe xss.flatten)
       "concat ints" in forAll(
-        (xs: List[Int]) => xs.foldMap(List(_)) shouldBe xs)
+        (xs                      : List[Int]) => xs.foldMap(List(_)) shouldBe xs)
     }
 
     "adding big integers" should {

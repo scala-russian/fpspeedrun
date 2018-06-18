@@ -48,6 +48,7 @@ object semigroup extends Semigroup.ToSemigroupOps {
 }
 
 object monoid extends Monoid.ToMonoidOps{
+  def empty[T: Monoid]: T = ???
 
   implicit class ListOps[A](val xs: List[A]) extends AnyVal{
     import syntax.semigroup._
