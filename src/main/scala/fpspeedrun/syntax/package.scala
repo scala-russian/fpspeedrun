@@ -47,4 +47,12 @@ object semigroup extends Semigroup.ToSemigroupOps {
   }
 }
 
-object monoid extends Monoid.ToMonoidOps
+object monoid extends Monoid.ToMonoidOps{
+  implicit class ListOps[A](val xs: List[A]) extends AnyVal{
+    def foldAll(implicit mon: Monoid[A]): A = ???
+
+    def foldMap[B: Monoid](f: A => B): B = ???
+
+    def foldVia[F[_]](implicit iso: Iso[A, F[A]], mon: Monoid[A]): A = ???
+  }
+}

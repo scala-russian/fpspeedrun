@@ -1,4 +1,5 @@
 package fpspeedrun
+import fpspeedrun.Iso.{Wrapper, WrapperCompanion}
 import simulacrum.typeclass
 import syntax.semigroup._
 
@@ -16,14 +17,36 @@ object Monoid extends StdMonoidInstances[Monoid] {
   }
 }
 
+
+final case class Endo[A](f: A => A) extends AnyVal
+
+object Endo{
+  implicit def endoMonoid[A]: Monoid[Endo[A]] = ???
+}
+
+final case class Sum[T](value: T) extends AnyVal with Wrapper[T]
+
+object Sum extends WrapperCompanion[Sum] {
+  implicit def sumMonoid[T: Num]: Monoid[Sum[T]] = ???
+}
+
+final case class Prod[T](value: T) extends AnyVal with Wrapper[T]
+
+object Prod extends WrapperCompanion[Prod] {
+  implicit def prodMonoid[T: Num]: Monoid[Prod[T]] = ???
+}
+
+
 trait StdMonoidInstances[TC[x] >: Monoid[x]] {
-  final implicit val stringMonoid: Monoid[String] = new Monoid[String] {
+  final implicit val stringMonoid: TC[String] = new Monoid[String] {
     override def empty: String = ""
     override def combine(x: String, y: String): String = x + y
   }
 
-  final implicit def listMonoid[A]: Monoid[List[A]] = new Monoid[List[A]] {
+  final implicit def listMonoid[A]: TC[List[A]] = new Monoid[List[A]] {
     override def empty: List[A] = List.empty
     override def combine(x: List[A], y: List[A]): List[A] = x ::: y
   }
+
+  final implicit def vectorMonoid[A]: TC[Vector[A]] = ???
 }
