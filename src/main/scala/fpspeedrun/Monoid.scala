@@ -17,12 +17,12 @@ object Monoid extends StdMonoidInstances[Monoid] {
 }
 
 trait StdMonoidInstances[TC[x] >: Monoid[x]] {
-  final implicit val stringMonoid: Monoid[String] = new Monoid[String] {
+  final implicit val stringMonoid: TC[String] = new Monoid[String] {
     override def empty: String = ""
     override def combine(x: String, y: String): String = x + y
   }
 
-  final implicit def listMonoid[A]: Monoid[List[A]] = new Monoid[List[A]] {
+  final implicit def listMonoid[A]: TC[List[A]] = new Monoid[List[A]] {
     override def empty: List[A] = List.empty
     override def combine(x: List[A], y: List[A]): List[A] = x ::: y
   }
