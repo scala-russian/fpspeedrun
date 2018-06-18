@@ -23,7 +23,7 @@ class MonoidSuite extends WordSpec with Matchers with PropertyChecks {
     }
 
     "yield empty prod" in {
-      mempty[Prod[Double]] shouldBe Sum(1.0)
+      mempty[Prod[Double]] shouldBe Prod(1.0)
     }
   }
 
