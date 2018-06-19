@@ -28,7 +28,7 @@ object Eq extends StdEqInstances {
         case Nil => ys.isEmpty
         case x :: xt =>
           ys match {
-            case Nil => false
+            case Nil     => false
             case y :: yt => x === y && go(xt, yt)
           }
       }
@@ -36,11 +36,11 @@ object Eq extends StdEqInstances {
   }
 }
 
-trait StdEqInstances extends StdOrdInstances[Eq]{
+trait StdEqInstances extends StdOrdInstances[Eq] {
   import Eq.ops._
   implicit def eitherEq[A: Eq, B: Eq]: Eq[Either[A, B]] = {
-    case (Left(x), Left(y)) => x === y
+    case (Left(x), Left(y))   => x === y
     case (Right(x), Right(y)) => x === y
-    case _ => false
+    case _                    => false
   }
 }

@@ -32,12 +32,13 @@ object ZipList {
   }
 
   def apply[A](list: List[A]): ZipList[A] = Finite(list)
-  def repeat[A](value: A): ZipList[A] = Repeat(value)
+  def repeat[A](value: A): ZipList[A]     = Repeat(value)
 
   implicit def zipListSemigroup[A: Semigroup]: Semigroup[ZipList[A]] =
     new ZipListSemigroup[A]
 
-  implicit def zipListMonoid[A: Monoid]: Monoid[ZipList[A]] = new ZipListMonoid[A]
+  implicit def zipListMonoid[A: Monoid]: Monoid[ZipList[A]] =
+    new ZipListMonoid[A]
 
   implicit def zipListEq[A: Eq]: Eq[ZipList[A]] = _.value === _.value
 
@@ -70,8 +71,7 @@ object ZipList {
   }
 
   class ZipListInteg[A: Integ] extends ZipListNum[A] with Integ[ZipList[A]] {
-    override def quotRem(xs: ZipList[A],
-                         ys: ZipList[A]): (ZipList[A], ZipList[A]) =
+    override def quotRem(xs: ZipList[A], ys: ZipList[A]): (ZipList[A], ZipList[A]) =
       xs.zipWith(ys)(_ /% _) match {
         case Repeat((q, r)) => (Repeat(q), Repeat(r))
         case Finite(pairs) =>
@@ -90,9 +90,7 @@ object ZipList {
       x.zipWith(y)(_ |+| _)
   }
 
-  class ZipListMonoid[A: Monoid]
-      extends ZipListSemigroup[A]
-      with Monoid[ZipList[A]] {
+  class ZipListMonoid[A: Monoid] extends ZipListSemigroup[A] with Monoid[ZipList[A]] {
     override def empty: ZipList[A] = repeat(Monoid[A].empty)
   }
 

@@ -10,7 +10,6 @@ trait Semigroup[T] {
 
 object Semigroup extends StdSemigroupInstances
 
-
 final case class First[T](value: T) extends AnyVal with Wrapper[T]
 
 object First extends WrapperCompanion[First] {

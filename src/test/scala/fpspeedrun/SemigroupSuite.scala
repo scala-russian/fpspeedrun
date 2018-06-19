@@ -13,8 +13,7 @@ class SemigroupSuite extends WordSpec with Matchers with PropertyChecks {
         List.empty[String].reduceOpt shouldBe None
       }
       "reduce non empty list" in {
-        forAll((x : String, xs: List[String]) =>
-          (x :: xs).reduceOpt shouldBe Some((x :: xs).mkString))
+        forAll((x: String, xs: List[String]) => (x :: xs).reduceOpt shouldBe Some((x :: xs).mkString))
       }
     }
 
@@ -24,8 +23,7 @@ class SemigroupSuite extends WordSpec with Matchers with PropertyChecks {
           List.empty[Int].reduceOptVia[Sum] shouldBe None
         }
         "reduce non-empty list" in {
-          forAll((x: Int, xs: List[Int]) =>
-            (x :: xs).reduceOptVia[Sum] shouldBe Some(x + xs.sum))
+          forAll((x: Int, xs: List[Int]) => (x :: xs).reduceOptVia[Sum] shouldBe Some(x + xs.sum))
         }
       }
 
@@ -34,8 +32,7 @@ class SemigroupSuite extends WordSpec with Matchers with PropertyChecks {
           List.empty[Int].reduceOptVia[Prod] shouldBe None
         }
         "reduce non-empty list" in {
-          forAll((x: Int, xs: List[Int]) =>
-            (x :: xs).reduceOptVia[Prod] shouldBe Some(x * xs.product))
+          forAll((x: Int, xs: List[Int]) => (x :: xs).reduceOptVia[Prod] shouldBe Some(x * xs.product))
         }
       }
 
@@ -44,8 +41,7 @@ class SemigroupSuite extends WordSpec with Matchers with PropertyChecks {
           List.empty[Int].reduceOptVia[First] shouldBe None
         }
         "reduce non-empty list" in {
-          forAll((x: Int, xs: List[Int]) =>
-            (x :: xs).reduceOptVia[First] shouldBe Some(x))
+          forAll((x: Int, xs: List[Int]) => (x :: xs).reduceOptVia[First] shouldBe Some(x))
         }
       }
 
@@ -54,8 +50,7 @@ class SemigroupSuite extends WordSpec with Matchers with PropertyChecks {
           List.empty[Int].reduceOptVia[Last] shouldBe None
         }
         "reduce non-empty list" in {
-          forAll((x: Int, xs: List[Int]) =>
-            (x :: xs).reduceOptVia[Last] shouldBe Some((x :: xs).last))
+          forAll((x: Int, xs: List[Int]) => (x :: xs).reduceOptVia[Last] shouldBe Some((x :: xs).last))
         }
       }
     }
@@ -63,40 +58,28 @@ class SemigroupSuite extends WordSpec with Matchers with PropertyChecks {
     "reducing ratios" when {
       "fractions are integers" should {
         "sum numerators" in {
-          forAll((xs: List[Int]) =>
-            xs.map(_.toRatio).reduceOptVia[Sum] shouldBe xs.reduceOption(_ + _).map(_.toRatio)
-          )
+          forAll((xs: List[Int]) => xs.map(_.toRatio).reduceOptVia[Sum] shouldBe xs.reduceOption(_ + _).map(_.toRatio))
         }
 
         "multiply numerators" in {
-          forAll((xs: List[Int]) =>
-            xs.map(_.toRatio).reduceOptVia[Prod] shouldBe xs.reduceOption(_ * _).map(_.toRatio)
-          )
+          forAll((xs: List[Int]) => xs.map(_.toRatio).reduceOptVia[Prod] shouldBe xs.reduceOption(_ * _).map(_.toRatio))
         }
       }
       "facing arbitrary fractions" should {
         "sum fractions" in {
-          forAll((xs: List[Ratio[BigInt]]) =>
-            xs.reduceOptVia[Sum] shouldBe xs.reduceOption(_ + _)
-          )
+          forAll((xs: List[Ratio[BigInt]]) => xs.reduceOptVia[Sum] shouldBe xs.reduceOption(_ + _))
         }
 
         "multiply fractions" in {
-          forAll((xs: List[Ratio[BigInt]]) =>
-            xs.reduceOptVia[Prod] shouldBe xs.reduceOption(_ * _)
-          )
+          forAll((xs: List[Ratio[BigInt]]) => xs.reduceOptVia[Prod] shouldBe xs.reduceOption(_ * _))
         }
 
         "find leftmost fraction" in {
-          forAll((xs: List[Ratio[BigInt]]) =>
-            xs.reduceOptVia[First] shouldBe xs.headOption
-          )
+          forAll((xs: List[Ratio[BigInt]]) => xs.reduceOptVia[First] shouldBe xs.headOption)
         }
 
         "find rightmost fraction" in {
-          forAll((xs: List[Ratio[BigInt]]) =>
-            xs.reduceOptVia[Last] shouldBe xs.lastOption
-          )
+          forAll((xs: List[Ratio[BigInt]]) => xs.reduceOptVia[Last] shouldBe xs.lastOption)
         }
       }
     }

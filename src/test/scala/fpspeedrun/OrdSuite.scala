@@ -17,27 +17,19 @@ class OrdSuite extends WordSpec with Matchers with PropertyChecks {
 
   "ZipList comparison" should {
     "make smallest repeated smallest ziplist" in {
-      forAll((x: Double, xs: List[Double]) =>
-        (ZipList.repeat(0.0) <=> ZipList((x :: xs).map(_.abs + 1))) shouldBe LT
-      )
+      forAll((x: Double, xs: List[Double]) => (ZipList.repeat(0.0) <=> ZipList((x :: xs).map(_.abs + 1))) shouldBe LT)
     }
 
     "make larges repeated largest ziplist" in {
-      forAll((x: Double, xs: List[Double]) =>
-        (ZipList.repeat(0.0) <=> ZipList((x :: xs).map(-_.abs - 1))) shouldBe GT
-      )
+      forAll((x: Double, xs: List[Double]) => (ZipList.repeat(0.0) <=> ZipList((x :: xs).map(-_.abs - 1))) shouldBe GT)
     }
 
     "check simple list inequalities" in {
-      forAll((xs: List[Int], ys: List[Int]) =>
-        (ZipList(xs) <=> ZipList(ys)) shouldBe (xs <=> ys)
-      )
+      forAll((xs: List[Int], ys: List[Int]) => (ZipList(xs) <=> ZipList(ys)) shouldBe (xs <=> ys))
     }
 
     "check repeated inequalities" in {
-      forAll((x: Int, y: Int) =>
-        (ZipList.repeat(x) <=> ZipList.repeat(y)) shouldBe (x <=> y)
-      )
+      forAll((x: Int, y: Int) => (ZipList.repeat(x) <=> ZipList.repeat(y)) shouldBe (x <=> y))
     }
   }
 }

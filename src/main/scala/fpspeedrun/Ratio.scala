@@ -5,7 +5,7 @@ import syntax.integ._
 import syntax.eq._
 import syntax.ord._
 
-final case class Ratio[T] private(num: T, den: T){
+final case class Ratio[T] private (num: T, den: T) {
   override def toString = s"$num \\ $den"
 }
 
@@ -30,4 +30,3 @@ object Ratio {
       x.num * y.den compare x.den * y.num
   }
 }
-

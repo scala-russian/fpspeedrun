@@ -19,9 +19,7 @@ object Frac extends StdFracInstances[Frac] {
 }
 
 trait StdFracInstances[TC[typ] >: Frac[typ]] {
-  final implicit val doubleFrac: TC[Double] = Frac.fromFractional
-  final implicit val floatFrac: TC[Float] = Frac.fromFractional
+  final implicit val doubleFrac: TC[Double]         = Frac.fromFractional
+  final implicit val floatFrac: TC[Float]           = Frac.fromFractional
   final implicit val bigDecimalFrac: TC[BigDecimal] = Frac.fromFractional
 }
-
-

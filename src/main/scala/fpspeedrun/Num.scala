@@ -4,7 +4,7 @@ import simulacrum.{op, typeclass}
 import scala.annotation.tailrec
 
 @typeclass
-trait Num[A] extends Ord[A]{
+trait Num[A] extends Ord[A] {
   def fromInt(x: Int): A
 
   @op("+", alias = true)
@@ -13,8 +13,8 @@ trait Num[A] extends Ord[A]{
   @op(name = "*", alias = true)
   def times(x: A, y: A): A
 
-  def zero: A = fromInt(0)
-  def one: A = fromInt(1)
+  def zero: A     = fromInt(0)
+  def one: A      = fromInt(1)
   def minusOne: A = fromInt(-1)
 
   @op("unary_!", alias = true)
@@ -26,7 +26,7 @@ trait Num[A] extends Ord[A]{
   def pow(x: A, p: Int): A = Num.fastPow(x, p)(this)
 }
 
-object Num  extends StdNumInstances[Num] {
+object Num extends StdNumInstances[Num] {
   import ops._
 
   def fastPow[A](x: A, p: Int)(implicit num: Num[A]): A = {
@@ -39,13 +39,13 @@ object Num  extends StdNumInstances[Num] {
 
   def fromNumeric[A](implicit num: Numeric[A]): Num[A] = new FromNumeric[A]
 
-  class FromNumeric[A](implicit num: Numeric[A]) extends Ord.FromOrdering[A] with Num[A]{
-    override def fromInt(x: Int): A = num.fromInt(x)
-    override def plus(x: A, y: A): A = num.plus(x, y)
+  class FromNumeric[A](implicit num: Numeric[A]) extends Ord.FromOrdering[A] with Num[A] {
+    override def fromInt(x: Int): A   = num.fromInt(x)
+    override def plus(x: A, y: A): A  = num.plus(x, y)
     override def times(x: A, y: A): A = num.times(x, y)
-    override val zero: A = num.zero
-    override val one: A = num.one
-    override def negate(x: A): A = num.negate(x)
+    override val zero: A              = num.zero
+    override val one: A               = num.one
+    override def negate(x: A): A      = num.negate(x)
     override def minus(x: A, y: A): A = num.minus(x, y)
   }
 }

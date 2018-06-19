@@ -7,7 +7,7 @@ object ord extends Ord.ToOrdOps
 
 object num extends Num.ToNumOps {
   def zero[T: Num]: T = Num[T].zero
-  def one[T: Num]: T = Num[T].one
+  def one[T: Num]: T  = Num[T].one
   implicit class IntNumOps(val x: Int) extends AnyVal {
     def toNum[T](implicit num: Num[T]): T = num.fromInt(x)
   }
@@ -20,7 +20,7 @@ object frac extends Frac.ToFracOps
 object ratio {
   implicit class RatioOps[T](val x: T) extends AnyVal {
     def \\(y: T)(implicit int: Integ[T]): Ratio[T] = Ratio.make(x, y)
-    def toRatio(implicit int: Integ[T]): Ratio[T] = Ratio.make(x, int.one)
+    def toRatio(implicit int: Integ[T]): Ratio[T]  = Ratio.make(x, int.one)
   }
 }
 
@@ -31,7 +31,7 @@ object semigroup extends Semigroup.ToSemigroupOps {
 
     def reduceMapOpt[B](f: A => B)(implicit sg: Semigroup[B]): Option[B] =
       xs match {
-        case Nil => None
+        case Nil       => None
         case x :: rest => Some(rest.foldLeft(f(x))((b, a) => b |+| f(a)))
       }
 
@@ -40,17 +40,17 @@ object semigroup extends Semigroup.ToSemigroupOps {
   }
 
   implicit class SemigroupNewtypeOps[T](val x: T) extends AnyVal {
-    def sum: Sum[T] = Sum(x)
-    def prod: Prod[T] = Prod(x)
+    def sum: Sum[T]     = Sum(x)
+    def prod: Prod[T]   = Prod(x)
     def first: First[T] = First(x)
-    def last: Last[T] = Last(x)
+    def last: Last[T]   = Last(x)
   }
 }
 
-object monoid extends Monoid.ToMonoidOps{
+object monoid extends Monoid.ToMonoidOps {
   def empty[T: Monoid]: T = Monoid[T].empty
 
-  implicit class ListOps[A](val xs: List[A]) extends AnyVal{
+  implicit class ListOps[A](val xs: List[A]) extends AnyVal {
     import syntax.semigroup._
     def foldAll(implicit mon: Monoid[A]): A = xs.foldLeft(mon.empty)(mon.combine)
 

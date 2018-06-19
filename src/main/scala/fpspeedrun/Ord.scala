@@ -61,8 +61,7 @@ object Ord extends StdOrdInstances[Ord] {
 
   implicit def seqOrd[T: Ord]: Ord[Seq[T]] =
     (xs, ys) =>
-      (xs, ys).zipped
-        .collectFirst { case Compared(cmp) if cmp =/= EQ => cmp }
+      (xs, ys).zipped.collectFirst { case Compared(cmp) if cmp =/= EQ => cmp }
         .getOrElse(xs.size <=> ys.size)
 
   object Compared {
@@ -80,7 +79,7 @@ object Ord extends StdOrdInstances[Ord] {
 
 trait StdOrdInstances[TC[t] >: Ord[t]] extends StdNumInstances[TC] {
   import Ord.ops._
-  final implicit val stringOrd: TC[String] = byOrdering
+  final implicit val stringOrd: TC[String]            = byOrdering
   final implicit def optionOrd[A: Ord]: TC[Option[A]] = optionOrdInstance[A]
 
   private def optionOrdInstance[A: Ord]: Ord[Option[A]] = {
