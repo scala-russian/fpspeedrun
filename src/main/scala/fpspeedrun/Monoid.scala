@@ -21,19 +21,33 @@ object Monoid extends StdMonoidInstances[Monoid] {
 final case class Endo[A](run: A => A) extends AnyVal
 
 object Endo{
-  implicit def endoMonoid[A]: Monoid[Endo[A]] = ???
+  implicit def endoMonoid[A]: Monoid[Endo[A]] = new Monoid[Endo[A]] {
+    def empty: Endo[A] = Endo[A]((x: A) => x)
+
+    def combine(x: Endo[A], y: Endo[A]): Endo[A] = Endo[A](x.run andThen y.run)
+  }
 }
 
 final case class Sum[T](value: T) extends AnyVal with Wrapper[T]
 
 object Sum extends WrapperCompanion[Sum] {
-  implicit def sumMonoid[T: Num]: Monoid[Sum[T]] = ???
+  implicit def sumMonoid[T: Num]: Monoid[Sum[T]] = new Monoid[Sum[T]] {
+    def empty: Sum[T] = wrapperIso[T].wrap(implicitly[Num[T]].fromInt(0))
+
+    def combine(x: Sum[T], y: Sum[T]): Sum[T] =
+      wrapperIso[T].wrap(implicitly[Num[T]].plus(wrapperIso[T].unwrap(x), wrapperIso[T].unwrap(y)))
+  }
 }
 
 final case class Prod[T](value: T) extends AnyVal with Wrapper[T]
 
 object Prod extends WrapperCompanion[Prod] {
-  implicit def prodMonoid[T: Num]: Monoid[Prod[T]] = ???
+  implicit def prodMonoid[T: Num]: Monoid[Prod[T]] = new Monoid[Prod[T]] {
+    def empty: Prod[T] = wrapperIso[T].wrap(implicitly[Num[T]].fromInt(1))
+
+    def combine(x: Prod[T], y: Prod[T]): Prod[T] =
+      wrapperIso[T].wrap(implicitly[Num[T]].times(wrapperIso[T].unwrap(x), wrapperIso[T].unwrap(y)))
+  }
 }
 
 
