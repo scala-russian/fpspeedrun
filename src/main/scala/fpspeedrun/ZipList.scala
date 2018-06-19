@@ -54,16 +54,7 @@ object ZipList {
     override def fromInt(x: Int): ZipList[A] = Repeat(implicitly[Num[A]].fromInt(x))
     override def plus(x: ZipList[A], y: ZipList[A]): ZipList[A] = x.zipWith(y)(_ + _)
     override def times(x: ZipList[A], y: ZipList[A]): ZipList[A] = x.zipWith(y)(_ * _)
-    override def compare(x: ZipList[A], y: ZipList[A]): Ord.Compare = (x.value, y.value) match {
-      case (Left(x1), Left(y1)) => x1 <=> y1
-      case (Right(x1), Right(y1)) => x1 <=> y1
-      case (Left(x1), Right(ys)) => ys.collectFirst {
-        case y1 if (x1 <=> y1) != EQ => x1 <=> y1
-      }.getOrElse(EQ)
-      case (Right(xs), Left(y1)) => xs.collectFirst {
-        case x1 if (x1 <=> y1) != EQ => x1 <=> y1
-      }.getOrElse(EQ)
-    }
+    override def compare(x: ZipList[A], y: ZipList[A]): Ord.Compare = zipListOrd.compare(x, y)
   }
 
   implicit def zipListInteg[A: Integ]: Integ[ZipList[A]] = new Integ[ZipList[A]] {
@@ -76,16 +67,7 @@ object ZipList {
     override def fromInt(x: Int): ZipList[A] = Repeat(implicitly[Integ[A]].fromInt(x))
     override def plus(x: ZipList[A], y: ZipList[A]): ZipList[A] = x.zipWith(y)(_ + _)
     override def times(x: ZipList[A], y: ZipList[A]): ZipList[A] = x.zipWith(y)(_ * _)
-    override def compare(x: ZipList[A], y: ZipList[A]): Ord.Compare = (x.value, y.value) match {
-      case (Left(x1), Left(y1)) => x1 <=> y1
-      case (Right(x1), Right(y1)) => x1 <=> y1
-      case (Left(x1), Right(ys)) => ys.collectFirst {
-        case y1 if (x1 <=> y1) != EQ => x1 <=> y1
-      }.getOrElse(EQ)
-      case (Right(xs), Left(y1)) => xs.collectFirst {
-        case x1 if (x1 <=> y1) != EQ => x1 <=> y1
-      }.getOrElse(EQ)
-    }
+    override def compare(x: ZipList[A], y: ZipList[A]): Ord.Compare = zipListOrd.compare(x, y)
   }
 
   implicit def zipListFrac[A: Frac]: Frac[ZipList[A]] = new Frac[ZipList[A]] {
@@ -93,15 +75,6 @@ object ZipList {
     override def fromInt(x: Int): ZipList[A] = Repeat(implicitly[Frac[A]].fromInt(x))
     override def plus(x: ZipList[A], y: ZipList[A]): ZipList[A] = x.zipWith(y)(_ + _)
     override def times(x: ZipList[A], y: ZipList[A]): ZipList[A] = x.zipWith(y)(_ * _)
-    override def compare(x: ZipList[A], y: ZipList[A]): Ord.Compare = (x.value, y.value) match {
-      case (Left(x1), Left(y1)) => x1 <=> y1
-      case (Right(x1), Right(y1)) => x1 <=> y1
-      case (Left(x1), Right(ys)) => ys.collectFirst {
-        case y1 if (x1 <=> y1) != EQ => x1 <=> y1
-      }.getOrElse(EQ)
-      case (Right(xs), Left(y1)) => xs.collectFirst {
-        case x1 if (x1 <=> y1) != EQ => x1 <=> y1
-      }.getOrElse(EQ)
-    }
+    override def compare(x: ZipList[A], y: ZipList[A]): Ord.Compare = zipListOrd(Ord[A]).compare(x, y)
   }
 }
