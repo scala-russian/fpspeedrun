@@ -55,6 +55,7 @@ object monoid extends Monoid.ToMonoidOps{
 
     def foldMap[B: Monoid](f: A => B): B = xs.map(f).foldAll
 
-    def foldVia[F[_]](implicit iso: Iso[A, F[A]], mon: Monoid[F[A]]): A = iso.unwrap(xs.foldMap(iso.wrap))
+    def foldVia[F[_]](implicit iso: Iso[A, F[A]], mon: Monoid[F[A]]): A =
+      xs.foldLeft(iso.unwrap(mon.empty))((x, y) => iso.unwrap(mon.combine(iso.wrap(x), iso.wrap(y))))
   }
 }
