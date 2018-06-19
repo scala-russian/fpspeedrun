@@ -48,7 +48,7 @@ object semigroup extends Semigroup.ToSemigroupOps {
 }
 
 object monoid extends Monoid.ToMonoidOps{
-  def empty[T: Monoid]: T = implicitly[Monoid[T]].empty
+  def empty[T: Monoid]: T = Monoid[T].empty
 
   implicit class ListOps[A](val xs: List[A]) extends AnyVal{
     def foldAll(implicit mon: Monoid[A]): A = xs.foldLeft(mon.empty)(mon.combine)

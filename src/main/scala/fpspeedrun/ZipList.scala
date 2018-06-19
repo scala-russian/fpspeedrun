@@ -5,6 +5,7 @@ import fpspeedrun.syntax.ord._
 import fpspeedrun.syntax.num._
 import fpspeedrun.syntax.integ._
 import fpspeedrun.syntax.frac._
+import fpspeedrun.syntax.semigroup._
 import fpspeedrun.Ord.Compare._
 
 trait ZipList[A] {
@@ -32,12 +33,11 @@ object ZipList {
   def apply[A](list: List[A]): ZipList[A] = Finite(list)
   def repeat[A](value: A): ZipList[A] = Repeat(value)
 
-  implicit def zipListSemigroup[A: Semigroup]: Semigroup[ZipList[A]] = new Semigroup[ZipList[A]] {
-    override def combine(x: ZipList[A], y: ZipList[A]): ZipList[A] = x.zipWith(y)(implicitly[Semigroup[A]].combine)
-  }
+  implicit def zipListSemigroup[A: Semigroup]: Semigroup[ZipList[A]] =
+    (x: ZipList[A], y: ZipList[A]) => x.zipWith(y)(_ combine _)
 
   implicit def zipListMonoid[A: Monoid]: Monoid[ZipList[A]] = new Monoid[ZipList[A]] {
-    override def empty: ZipList[A] = repeat(implicitly[Monoid[A]].empty)
+    override def empty: ZipList[A] = repeat(Monoid[A].empty)
     override def combine(x: ZipList[A], y: ZipList[A]): ZipList[A] = zipListSemigroup(Semigroup[A]).combine(x, y)
   }
 
@@ -56,7 +56,7 @@ object ZipList {
   }
 
   implicit def zipListNum[A: Num]: Num[ZipList[A]] = new Num[ZipList[A]] {
-    override def fromInt(x: Int): ZipList[A] = Repeat(implicitly[Num[A]].fromInt(x))
+    override def fromInt(x: Int): ZipList[A] = Repeat(x.toNum)
     override def plus(x: ZipList[A], y: ZipList[A]): ZipList[A] = x.zipWith(y)(_ + _)
     override def times(x: ZipList[A], y: ZipList[A]): ZipList[A] = x.zipWith(y)(_ * _)
     override def compare(x: ZipList[A], y: ZipList[A]): Ord.Compare = zipListOrd.compare(x, y)
