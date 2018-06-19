@@ -53,13 +53,13 @@ object monoid extends Monoid.ToMonoidOps {
 
   implicit class ListOps[A](val xs: List[A]) extends AnyVal {
     def foldAll(implicit mon: Monoid[A]): A =
-      xs.foldRight(mon.empty)(mon.combine)
+      xs.foldLeft(mon.empty)(mon.combine)
 
     def foldMap[B](f: A => B)(implicit m: Monoid[B]): B =
-      xs.map(f).foldRight(m.empty)(m.combine)
+      xs.map(f).foldLeft(m.empty)(m.combine)
 
     def foldVia[F[_]](implicit iso: Iso[A, F[A]], mon: Monoid[F[A]]): A =
-      xs.foldRight(iso.unwrap(mon.empty))((a, b) =>
+      xs.foldLeft(iso.unwrap(mon.empty))((a, b) =>
         iso.unwrap(mon.combine(iso.wrap(a), iso.wrap(b))))
   }
 }

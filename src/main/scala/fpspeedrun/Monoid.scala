@@ -2,6 +2,7 @@ package fpspeedrun
 import fpspeedrun.Iso.{Wrapper, WrapperCompanion}
 import simulacrum.typeclass
 import syntax.semigroup._
+import Num.ops._
 
 @typeclass
 trait Monoid[A] extends Semigroup[A] with Default[A] {
@@ -24,7 +25,7 @@ object Endo {
   implicit def endoMonoid[A]: Monoid[Endo[A]] = new Monoid[Endo[A]] {
     override def empty: Endo[A] = Endo(identity)
     override def combine(x: Endo[A], y: Endo[A]): Endo[A] =
-      Endo(a => y.run(x.run(a)))
+      Endo(x.run.andThen(y.run))
   }
 }
 
@@ -35,7 +36,7 @@ object Sum extends WrapperCompanion[Sum] {
     new Monoid[Sum[T]] {
       override def empty: Sum[T] = Sum(n.zero)
       override def combine(x: Sum[T], y: Sum[T]): Sum[T] =
-        Sum(n.plus(x.value, y.value))
+        Sum(x.value + y.value)
     }
 }
 
@@ -46,7 +47,7 @@ object Prod extends WrapperCompanion[Prod] {
     new Monoid[Prod[T]] {
       override def empty: Prod[T] = Prod(n.one)
       override def combine(x: Prod[T], y: Prod[T]): Prod[T] =
-        Prod(n.times(x.value, y.value))
+        Prod(x.value * y.value)
     }
 }
 

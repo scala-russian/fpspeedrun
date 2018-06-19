@@ -47,17 +47,11 @@ object ZipList {
 
   implicit def zipListOrd[A: Ord]: Ord[ZipList[A]] =
     (x: ZipList[A], y: ZipList[A]) =>
-      x.value match {
-        case Left(xx) =>
-          y.value match {
-            case Left(yy)  => xx <=> yy
-            case Right(ys) => xx <=> ys.head
-          }
-        case Right(xx: List[A]) =>
-          y.value match {
-            case Left(yy)           => xx.head <=> yy
-            case Right(ys: List[A]) => xx <=> ys
-          }
+      (x.value, y.value) match {
+        case (Left(xx), Left(yy))   => xx <=> yy
+        case (Left(xx), Right(ys))  => xx <=> ys.head
+        case (Right(xs), Left(yy))  => xs.head <=> yy
+        case (Right(xs), Right(ys)) => xs <=> ys
     }
 
   implicit def zipListNum[A](implicit n: Num[A]): Num[ZipList[A]] =
@@ -72,17 +66,11 @@ object ZipList {
         x.zipWith(y)(n.times)
 
       override def compare(x: ZipList[A], y: ZipList[A]): Compare =
-        x.value match {
-          case Left(xx) =>
-            y.value match {
-              case Left(yy)  => xx <=> yy
-              case Right(ys) => xx <=> ys.head
-            }
-          case Right(xx: List[A]) =>
-            y.value match {
-              case Left(yy)           => xx.head <=> yy
-              case Right(ys: List[A]) => xx <=> ys
-            }
+        (x.value, y.value) match {
+          case (Left(xx), Left(yy))   => xx <=> yy
+          case (Left(xx), Right(ys))  => xx <=> ys.head
+          case (Right(xs), Left(yy))  => xs.head <=> yy
+          case (Right(xs), Right(ys)) => xs <=> ys
         }
     }
 
@@ -102,17 +90,11 @@ object ZipList {
         x.zipWith(y)(i.times)
 
       override def compare(x: ZipList[A], y: ZipList[A]): Compare =
-        x.value match {
-          case Left(xx) =>
-            y.value match {
-              case Left(yy)  => xx <=> yy
-              case Right(ys) => i.compare(xx, ys.head)
-            }
-          case Right(xs: List[A]) =>
-            y.value match {
-              case Left(yy)           => i.compare(xs.head, yy)
-              case Right(ys: List[A]) => xs <=> ys
-            }
+        (x.value, y.value) match {
+          case (Left(xx), Left(yy))   => xx <=> yy
+          case (Left(xx), Right(ys))  => xx <=> ys.head
+          case (Right(xs), Left(yy))  => xs.head <=> yy
+          case (Right(xs), Right(ys)) => xs <=> ys
         }
     }
 
@@ -130,17 +112,11 @@ object ZipList {
         x.zipWith(y)(f.times)
 
       override def compare(x: ZipList[A], y: ZipList[A]): Compare =
-        x.value match {
-          case Left(xx) =>
-            y.value match {
-              case Left(yy)  => xx <=> yy
-              case Right(ys) => xx <=> ys.head
-            }
-          case Right(xx: List[A]) =>
-            y.value match {
-              case Left(yy)           => xx.head <=> yy
-              case Right(ys: List[A]) => xx <=> ys
-            }
+        (x.value, y.value) match {
+          case (Left(xx), Left(yy))   => xx <=> yy
+          case (Left(xx), Right(ys))  => xx <=> ys.head
+          case (Right(xs), Left(yy))  => xs.head <=> yy
+          case (Right(xs), Right(ys)) => xs <=> ys
         }
     }
 }
