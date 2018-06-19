@@ -8,6 +8,43 @@ trait Monoid[A] extends Semigroup[A] with Default[A]{
   override def default: A = empty
 }
 
+sealed trait FreeMonoid[+T]
+
+case object EmptyM extends FreeMonoid[Nothing]
+final case class OnlyM[T](x: T) extends FreeMonoid[T]
+final case class ConsM[T](x: T, y: FreeMonoid[T]) extends FreeMonoid[T]
+
+object FreeMonoid {
+
+  def apply[T](xs: T*): FreeMonoid[T] = xs match {
+    case Seq()     => EmptyM
+    case h +: Nil  => OnlyM(h)
+    case h +: tail => ConsM(h, apply(tail: _*))
+  }
+
+  implicit def freeMonoidMonoid[T]: Monoid[FreeMonoid[T]] = new Monoid[FreeMonoid[T]] {
+    def empty: FreeMonoid[T] = EmptyM
+
+    def combine(x: FreeMonoid[T], y: FreeMonoid[T]): FreeMonoid[T] = (x, y) match {
+      case (EmptyM, m)                   => m
+      case (m, EmptyM)                   => m
+      case (OnlyM(a), OnlyM(b))          => ConsM(a, OnlyM(b))
+      case (OnlyM(a), c@ConsM(_, _))     => ConsM(a, c)
+      case (ConsM(a, as), o@OnlyM(b))    => ConsM(a, combine(as, o))
+      case (ConsM(a, as), c@ConsM(_, _)) => ConsM(a, combine(as, c))
+    }
+  }
+
+  implicit class FreeMonoidOps[T](val x: FreeMonoid[T]) extends AnyVal {
+    def reduceAll(implicit mon: Monoid[T]): T = x match {
+      case EmptyM       => mon.empty
+      case OnlyM(a)     => a
+      case ConsM(a, as) => mon.combine(a, as.reduceAll)
+    }
+  }
+
+}
+
 object Monoid extends StdMonoidInstances[Monoid] {
   implicit def optionMonoid[T: Semigroup]: Monoid[Option[T]] = new Monoid[Option[T]] {
     override def empty: Option[T] = None
