@@ -9,29 +9,32 @@ trait Semigroup[T] {
   def combine(x: T, y: T): T
 }
 
-sealed trait FreeSemigroup[T] {
-  val value: List[T]
-}
+sealed trait FreeSemigroup[T]
 
-final case class Only[T](x: T) extends FreeSemigroup[T] {
-  val value: List[T] = List(x)
-}
-final case class Concat[T](x: FreeSemigroup[T], y: FreeSemigroup[T]) extends FreeSemigroup[T] {
-  val value: List[T] = x.value ++ y.value
-}
+final case class Only[T](x: T) extends FreeSemigroup[T]
+final case class Cons[T](x: T, y: FreeSemigroup[T]) extends FreeSemigroup[T]
 
 object FreeSemigroup {
 
   def apply[T](x: T, y: T*): FreeSemigroup[T] = y match {
     case Seq()     => Only(x)
-    case h +: tail => Concat(Only(x), apply[T](h, tail: _*))
+    case h +: tail => Cons(x, apply[T](h, tail: _*))
   }
 
-  implicit def freeSemigroupSemigroup[T]: Semigroup[FreeSemigroup[T]] =
-    (x: FreeSemigroup[T], y: FreeSemigroup[T]) => Concat(x, y)
+  implicit def freeSemigroupSemigroup[T]: Semigroup[FreeSemigroup[T]] = new Semigroup[FreeSemigroup[T]] {
+    def combine(x: FreeSemigroup[T], y: FreeSemigroup[T]): FreeSemigroup[T] = (x, y) match {
+      case (Only(a), Only(b))          => Cons(a, Only(b))
+      case (Only(a), c@Cons(_, _))     => Cons(a, c)
+      case (Cons(a, as), o@Only(b))    => Cons(a, combine(as, o))
+      case (Cons(a, as), c@Cons(_, _)) => Cons(a, combine(as, c))
+    }
+  }
 
   implicit class FreeSemigroupOps[T](val x: FreeSemigroup[T]) extends AnyVal {
-    def reduceAll(implicit sg: Semigroup[T]): T = x.value.reduce(sg.combine)
+    def reduceAll(implicit sg: Semigroup[T]): T = x match {
+      case Only(a) => a
+      case Cons(a, as) => sg.combine(a, as.reduceAll)
+    }
   }
 
 }
