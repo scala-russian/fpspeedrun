@@ -58,5 +58,8 @@ trait StdMonoidInstances[TC[x] >: Monoid[x]] {
     override def combine(x: List[A], y: List[A]): List[A] = x ::: y
   }
 
-  final implicit def vectorMonoid[A]: TC[Vector[A]] = ???
+  final implicit def vectorMonoid[A]: TC[Vector[A]] = new Monoid[Vector[A]] {
+    override def empty: Vector[A] = Vector.empty
+    override def combine(x: Vector[A], y: Vector[A]): Vector[A] = x ++ y
+  }
 }
