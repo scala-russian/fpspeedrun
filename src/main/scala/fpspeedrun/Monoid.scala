@@ -8,6 +8,40 @@ trait Monoid[A] extends Semigroup[A] with Default[A]{
   override def default: A = empty
 }
 
+sealed trait FreeMonoid[+T] {
+  val value: List[T]
+}
+
+case object EmptyM extends FreeMonoid[Nothing] {
+  val value: List[Nothing] = List()
+}
+final case class OnlyM[T](x: T) extends FreeMonoid[T] {
+  val value: List[T] = List(x)
+}
+final case class ConcatM[T](x: FreeMonoid[T], y: FreeMonoid[T]) extends FreeMonoid[T] {
+  val value: List[T] = x.value ++ y.value
+}
+
+object FreeMonoid {
+
+  def apply[T](xs: T*): FreeMonoid[T] = xs match {
+    case Seq()     => EmptyM
+    case h +: Nil  => OnlyM(h)
+    case h +: tail => ConcatM(OnlyM(h), apply(tail: _*))
+  }
+
+  implicit def freeMonoidMonoid[T]: Monoid[FreeMonoid[T]] = new Monoid[FreeMonoid[T]] {
+    def empty: FreeMonoid[T] = EmptyM
+
+    def combine(x: FreeMonoid[T], y: FreeMonoid[T]) = ConcatM(x, y)
+  }
+
+  implicit class FreeMonoidOps[T](val x: FreeMonoid[T]) extends AnyVal {
+    def reduceAll(implicit mon: Monoid[T]): T = x.value.fold(mon.empty)(mon.combine)
+  }
+
+}
+
 object Monoid extends StdMonoidInstances[Monoid] {
   implicit def optionMonoid[T: Semigroup]: Monoid[Option[T]] = new Monoid[Option[T]] {
     override def empty: Option[T] = None

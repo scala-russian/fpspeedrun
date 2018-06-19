@@ -9,6 +9,33 @@ trait Semigroup[T] {
   def combine(x: T, y: T): T
 }
 
+sealed trait FreeSemigroup[T] {
+  val value: List[T]
+}
+
+final case class Only[T](x: T) extends FreeSemigroup[T] {
+  val value: List[T] = List(x)
+}
+final case class Concat[T](x: FreeSemigroup[T], y: FreeSemigroup[T]) extends FreeSemigroup[T] {
+  val value: List[T] = x.value ++ y.value
+}
+
+object FreeSemigroup {
+
+  def apply[T](x: T, y: T*): FreeSemigroup[T] = y match {
+    case Seq()     => Only(x)
+    case h +: tail => Concat(Only(x), apply[T](h, tail: _*))
+  }
+
+  implicit def freeSemigroupSemigroup[T]: Semigroup[FreeSemigroup[T]] =
+    (x: FreeSemigroup[T], y: FreeSemigroup[T]) => Concat(x, y)
+
+  implicit class FreeSemigroupOps[T](val x: FreeSemigroup[T]) extends AnyVal {
+    def reduceAll(implicit sg: Semigroup[T]): T = x.value.reduce(sg.combine)
+  }
+
+}
+
 object Semigroup extends StdSemigroupInstances
 
 final case class Sum[T](value: T) extends AnyVal with Wrapper[T]
