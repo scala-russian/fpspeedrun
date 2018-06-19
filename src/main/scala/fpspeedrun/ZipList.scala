@@ -32,9 +32,14 @@ object ZipList {
   def apply[A](list: List[A]): ZipList[A] = Finite(list)
   def repeat[A](value: A): ZipList[A] = Repeat(value)
 
-  implicit def zipListSemigroup[A: Semigroup]: Semigroup[ZipList[A]] = ???
+  implicit def zipListSemigroup[A: Semigroup]: Semigroup[ZipList[A]] = new Semigroup[ZipList[A]] {
+    override def combine(x: ZipList[A], y: ZipList[A]): ZipList[A] = x.zipWith(y)(implicitly[Semigroup[A]].combine)
+  }
 
-  implicit def zipListMonoid[A: Monoid]: Monoid[ZipList[A]] = ???
+  implicit def zipListMonoid[A: Monoid]: Monoid[ZipList[A]] = new Monoid[ZipList[A]] {
+    override def empty: ZipList[A] = repeat(implicitly[Monoid[A]].empty)
+    override def combine(x: ZipList[A], y: ZipList[A]): ZipList[A] = zipListSemigroup(Semigroup[A]).combine(x, y)
+  }
 
   implicit def zipListEq[A: Eq]: Eq[ZipList[A]] = (x: ZipList[A], y: ZipList[A]) =>
     x.value === y.value
@@ -60,21 +65,21 @@ object ZipList {
   implicit def zipListInteg[A: Integ]: Integ[ZipList[A]] = new Integ[ZipList[A]] {
     override def quotRem(x: ZipList[A], y: ZipList[A]): (ZipList[A], ZipList[A]) = x.zipWith(y)(_ /% _).value match {
       case Left((q, r)) => Repeat(q) -> Repeat(r)
-      case Right(qrs) =>
-        val a = qrs.unzip
-        Finite(a._1) -> Finite(a._2)
+      case Right(qrs) => qrs.unzip match {
+        case (l, r) => ZipList(l) -> ZipList(r)
+      }
     }
-    override def fromInt(x: Int): ZipList[A] = Repeat(implicitly[Integ[A]].fromInt(x))
-    override def plus(x: ZipList[A], y: ZipList[A]): ZipList[A] = x.zipWith(y)(_ + _)
-    override def times(x: ZipList[A], y: ZipList[A]): ZipList[A] = x.zipWith(y)(_ * _)
+    override def fromInt(x: Int): ZipList[A] = zipListNum.fromInt(x)
+    override def plus(x: ZipList[A], y: ZipList[A]): ZipList[A] = zipListNum.plus(x, y)
+    override def times(x: ZipList[A], y: ZipList[A]): ZipList[A] = zipListNum.times(x, y)
     override def compare(x: ZipList[A], y: ZipList[A]): Ord.Compare = zipListOrd.compare(x, y)
   }
 
   implicit def zipListFrac[A: Frac]: Frac[ZipList[A]] = new Frac[ZipList[A]] {
     override def div(x: ZipList[A], y: ZipList[A]): ZipList[A] = x.zipWith(y)(_ / _)
-    override def fromInt(x: Int): ZipList[A] = Repeat(implicitly[Frac[A]].fromInt(x))
-    override def plus(x: ZipList[A], y: ZipList[A]): ZipList[A] = x.zipWith(y)(_ + _)
-    override def times(x: ZipList[A], y: ZipList[A]): ZipList[A] = x.zipWith(y)(_ * _)
+    override def fromInt(x: Int): ZipList[A] = zipListNum(Num[A]).fromInt(x)
+    override def plus(x: ZipList[A], y: ZipList[A]): ZipList[A] = zipListNum(Num[A]).plus(x, y)
+    override def times(x: ZipList[A], y: ZipList[A]): ZipList[A] = zipListNum(Num[A]).times(x, y)
     override def compare(x: ZipList[A], y: ZipList[A]): Ord.Compare = zipListOrd(Ord[A]).compare(x, y)
   }
 }
