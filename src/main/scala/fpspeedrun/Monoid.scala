@@ -23,7 +23,7 @@ final case class Endo[A](run: A => A) extends AnyVal
 object Endo{
   implicit def endoMonoid[A]: Monoid[Endo[A]] = new Monoid[Endo[A]] {
     override def empty: Endo[A] = Endo(identity)
-    override def combine(x: Endo[A], y: Endo[A]): Endo[A] = Endo(a => y.run(x.run(a)))
+    override def combine(x: Endo[A], y: Endo[A]): Endo[A] = Endo(x.run andThen y.run)
   }
 }
 
