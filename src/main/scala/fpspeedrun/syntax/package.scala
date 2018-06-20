@@ -5,7 +5,7 @@ object eq extends Eq.ToEqOps
 
 object ord extends Ord.ToOrdOps
 
-object num extends Num.ToNumOps {
+object num extends Num.ToNumOps with Calc.ToCalcOps {
   def zero[T: Num]: T = Num[T].zero
   def one[T: Num]: T = Num[T].one
   implicit class IntNumOps(val x: Int) extends AnyVal {
