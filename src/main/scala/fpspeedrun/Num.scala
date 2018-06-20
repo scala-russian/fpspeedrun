@@ -26,6 +26,9 @@ trait Num[A] extends Ord[A]{
   def pow(x: A, p: Int): A = Num.fastPow(x, p)(this)
 }
 
+// TODO create the real FreeNum
+sealed trait Expr[A]
+
 object Num  extends StdNumInstances[Num] {
   import ops._
 
@@ -48,6 +51,14 @@ object Num  extends StdNumInstances[Num] {
     override def negate(x: A): A = num.negate(x)
     override def minus(x: A, y: A): A = num.minus(x, y)
   }
+
+  //TODO implement this
+  implicit val freeNum: FreeConstruct[Num, Expr] =
+    new FreeConstruct[Num, Expr] {
+      override def embed[T](x: T): Expr[T] = ???
+      override def instance[T]: Num[Expr[T]] = ???
+      override def mapInterpret[A, B](fa: Expr[A])(f: A => B)(implicit instance: Num[B]): B = ???
+    }
 }
 
 trait StdNumInstances[TC[typ] >: Num[typ]] extends StdIntegInstances[TC] with StdFracInstances[TC]
