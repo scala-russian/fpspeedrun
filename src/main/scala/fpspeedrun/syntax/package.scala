@@ -1,6 +1,8 @@
 package fpspeedrun.syntax
 import fpspeedrun._
 
+import scala.annotation.tailrec
+
 object eq extends Eq.ToEqOps
 
 object ord extends Ord.ToOrdOps
@@ -44,6 +46,23 @@ object semigroup extends Semigroup.ToSemigroupOps {
     def prod: Prod[T] = Prod(x)
     def first: First[T] = First(x)
     def last: Last[T] = Last(x)
+  }
+
+  implicit class FreeMagmaOps[T](val x: FreeMagma[T]) extends AnyVal {
+    def reduceAll(implicit sm: Semigroup[T]): T = {
+      @tailrec def collector(queue: List[FreeMagma[T]], acc: T): T = queue match {
+        case Nil => acc
+        case Branch(l, r) :: qs => collector(l :: r :: qs, acc)
+        case Leaf(l) :: qs => collector(qs, acc combine l)
+      }
+
+      @tailrec def reducer(queue: List[FreeMagma[T]]): T = queue match {
+        case Branch(l, r) :: qs => reducer(l :: r :: qs)
+        case Leaf(l) :: qs => collector(qs, l)
+      }
+
+      reducer(x :: Nil)
+    }
   }
 }
 
