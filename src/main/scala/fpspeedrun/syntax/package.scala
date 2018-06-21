@@ -45,6 +45,13 @@ object semigroup extends Semigroup.ToSemigroupOps {
     def first: First[T] = First(x)
     def last: Last[T] = Last(x)
   }
+
+  implicit class FreeMagmaOps[T](val x: FreeMagma[T]) extends AnyVal {
+    def reduceAll(implicit sg: Semigroup[T]): T = x match {
+      case Leaf(l) => l
+      case Branch(l, r) => l.reduceAll combine r.reduceAll
+    }
+  }
 }
 
 object monoid extends Monoid.ToMonoidOps
