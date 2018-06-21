@@ -1,5 +1,6 @@
 package fpspeedrun
-import syntax.eq._
+
+import fpspeedrun.syntax.eq._
 
 import scala.annotation.tailrec
 
@@ -28,6 +29,7 @@ object Eq {
           case y :: yt => x === y && go(xt, yt)
         }
       }
+
     go
   }
 }
