@@ -13,13 +13,11 @@ object FreeMagma {
   def apply[T](x: T, y: T*): FreeMagma[T] = y match {
     case Seq()  => Leaf(x)
     case Seq(a) => Branch(Leaf(x), Leaf(a))
-    case ys     => {
-      val last = ys.last
-      val beforeLast = ys.init.last
-      val withoutTwoLast = ys.init.init
+    case ys     =>
+      val list   = (x +: ys).reverse
+      val first +: second +: rest = list
 
-      Branch(Leaf(x), withoutTwoLast.foldRight(Branch(Leaf(beforeLast), Leaf(last)))((e, acc) => Branch(Leaf(e), acc)))
-    }
+      rest.foldLeft(Branch(Leaf(second), Leaf(first)))((acc, e) => Branch(Leaf(e), acc))
   }
   
   implicit def freeMagmaMagma[T]: Magma[FreeMagma[T]] = (x: FreeMagma[T], y: FreeMagma[T]) => Branch(x, y)
