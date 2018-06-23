@@ -14,7 +14,7 @@ object Semigroup extends StdSemigroupInstances[Semigroup]{
   type FreeSemigroup[T] = ::[T]
   implicit val freeConstruct: FreeConstruct[Semigroup, FreeSemigroup] =
     new FreeConstruct[Semigroup, FreeSemigroup] {
-      override def embed[T](x: T): FreeSemigroup[T] = (x :: Nil).asInstanceOf[::[T]]
+      override def embed[T](x: T): FreeSemigroup[T] = ::[T](x, Nil)
       override def instance[T]: Semigroup[FreeSemigroup[T]] =
         (x: FreeSemigroup[T], y: FreeSemigroup[T]) => (x ++ y).asInstanceOf[::[T]]
       override def mapInterpret[A, B](fa: FreeSemigroup[A])(f: A => B)(implicit instance: Semigroup[B]): B =
