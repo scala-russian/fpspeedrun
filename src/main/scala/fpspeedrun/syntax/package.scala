@@ -48,13 +48,14 @@ object semigroup extends Semigroup.ToSemigroupOps {
 }
 
 object monoid extends Monoid.ToMonoidOps{
-  def empty[T: Monoid]: T = ???
+  def empty[T: Monoid]: T = Monoid[T].empty
 
   implicit class ListOps[A](val xs: List[A]) extends AnyVal{
-    def foldAll(implicit mon: Monoid[A]): A = ???
+    def foldAll(implicit mon: Monoid[A]): A = xs.fold(mon.empty) { case (acc, next) => mon.combine(acc, next) }
 
-    def foldMap[B: Monoid](f: A => B): B = ???
+    def foldMap[B: Monoid](f: A => B): B = xs.foldLeft(Monoid[B].empty) { case (acc, next) => Monoid[B].combine(acc, f(next)) }
 
-    def foldVia[F[_]](implicit iso: Iso[A, F[A]], mon: Monoid[F[A]]): A = ???
+    def foldVia[F[_]](implicit iso: Iso[A, F[A]], mon: Monoid[F[A]]): A =
+      iso.unwrap(xs.map(iso.wrap).fold(mon.empty) { case (acc, next) => Monoid[F[A]].combine(acc, next) } )
   }
 }
