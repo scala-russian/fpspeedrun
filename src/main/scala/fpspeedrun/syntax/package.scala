@@ -31,11 +31,12 @@ object semigroup extends Semigroup.ToSemigroupOps {
 
     def reduceMapOpt[B](f: A => B)(implicit sg: Semigroup[B]): Option[B] =
       xs match {
-        case Nil => None
+        case Nil       => None
         case x :: rest => Some(rest.foldLeft(f(x))((b, a) => b |+| f(a)))
       }
 
-    def reduceOptVia[F[_]](implicit iso: Iso[A, F[A]], sg: Semigroup[F[A]]): Option[A] =
+    def reduceOptVia[F[_]](implicit iso: Iso[A, F[A]],
+                           sg: Semigroup[F[A]]): Option[A] =
       xs.reduceOption((x, y) => iso.unwrap(iso.wrap(x) |+| iso.wrap(y)))
   }
 
@@ -47,14 +48,18 @@ object semigroup extends Semigroup.ToSemigroupOps {
   }
 }
 
-object monoid extends Monoid.ToMonoidOps{
-  def empty[T: Monoid]: T = ???
+object monoid extends Monoid.ToMonoidOps {
+  def empty[T](implicit ev$1: Monoid[T]): T = ev$1.empty
 
-  implicit class ListOps[A](val xs: List[A]) extends AnyVal{
-    def foldAll(implicit mon: Monoid[A]): A = ???
+  implicit class ListOps[A](val xs: List[A]) extends AnyVal {
+    def foldAll(implicit mon: Monoid[A]): A =
+      xs.foldLeft(mon.empty)(mon.combine)
 
-    def foldMap[B: Monoid](f: A => B): B = ???
+    def foldMap[B](f: A => B)(implicit m: Monoid[B]): B =
+      xs.map(f).foldLeft(m.empty)(m.combine)
 
-    def foldVia[F[_]](implicit iso: Iso[A, F[A]], mon: Monoid[F[A]]): A = ???
+    def foldVia[F[_]](implicit iso: Iso[A, F[A]], mon: Monoid[F[A]]): A =
+      xs.foldLeft(iso.unwrap(mon.empty))((a, b) =>
+        iso.unwrap(mon.combine(iso.wrap(a), iso.wrap(b))))
   }
 }
