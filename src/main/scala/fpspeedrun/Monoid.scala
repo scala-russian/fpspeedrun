@@ -1,5 +1,5 @@
 package fpspeedrun
-import fpspeedrun.Iso.{Wrapper, WrapperCompanion}
+import fpspeedrun.Iso.{ Wrapper, WrapperCompanion }
 import simulacrum.typeclass
 import syntax.semigroup._
 
@@ -18,13 +18,14 @@ object Monoid extends StdMonoidInstances[Monoid]{
     }
 
   //TODO find the real type. Hint: look below
-  type FreeMonoid[A] = Nothing
+  type FreeMonoid[A] = List[A]
 
   implicit val freeMonoid: FreeConstruct[Monoid, FreeMonoid] =
     new FreeConstruct[Monoid, FreeMonoid] {
-      override def embed[T](x: T): FreeMonoid[T] = ???
-      override def instance[T]: Monoid[FreeMonoid[T]] = ???
-      override def mapInterpret[A, B](fa: FreeMonoid[A])(f: A => B)(implicit instance: Monoid[B]): B = ???
+      override def embed[T](x: T): FreeMonoid[T] = x :: Nil
+      override def instance[T]: Monoid[FreeMonoid[T]] = implicitly[Monoid[List[T]]]
+      override def mapInterpret[A, B](fa: FreeMonoid[A])(f: A => B)(implicit instance: Monoid[B]): B =
+        fa.map(f).fold(instance.empty)(instance.combine)
     }
 }
 
