@@ -70,6 +70,15 @@ object Ord extends StdOrdInstances[Ord] {
 }
 
 trait StdOrdInstances[TC[t] >: Ord[t]] extends StdNumInstances[TC]{
+  import fpspeedrun.syntax.ord._
+
   final implicit val stringOrd: TC[String] = byOrdering
-  final implicit def optionOrd[A: Ord]: TC[Option[A]] = ???
+  final implicit def optionOrd[A: Ord]: TC[Option[A]] = new Ord[Option[A]] {
+    override def compare(x: Option[A], y: Option[A]): Compare = (x, y) match {
+      case (None, None) => Compare.EQ
+      case (Some(_), None) => Compare.GT
+      case (None, Some(_)) => Compare.LT
+      case (Some(v1), Some(v2)) => v1 <=> v2
+    }
+  }
 }

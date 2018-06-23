@@ -1,4 +1,5 @@
 package fpspeedrun
+import fpspeedrun.Eq.ops
 import simulacrum.{op, typeclass}
 
 import scala.annotation.tailrec
@@ -37,5 +38,11 @@ object Eq extends StdEqInstances {
 }
 
 trait StdEqInstances extends StdOrdInstances[Eq]{
-  implicit def eitherEq[A: Eq, B: Eq]: Eq[Either[A, B]] = ???
+  import ops._
+
+  implicit def eitherEq[A: Eq, B: Eq]: Eq[Either[A, B]] = (first, second) => (first, second) match {
+    case (Left(l1), Left(l2)) => l1 === l2
+    case (Right(r1), Right(r2)) => r1 === r2
+    case _ => false
+  }
 }
