@@ -51,11 +51,10 @@ object monoid extends Monoid.ToMonoidOps{
   def empty[T: Monoid]: T = Monoid[T].empty
 
   implicit class ListOps[A](val xs: List[A]) extends AnyVal{
-    def foldAll(implicit mon: Monoid[A]): A = xs.fold(mon.empty) { case (acc, next) => mon.combine(acc, next) }
+    def foldAll(implicit mon: Monoid[A]): A = xs.fold(empty)(mon.combine)
 
-    def foldMap[B: Monoid](f: A => B): B = xs.foldLeft(Monoid[B].empty) { case (acc, next) => Monoid[B].combine(acc, f(next)) }
+    def foldMap[B: Monoid](f: A => B): B = xs.foldLeft(empty) { case (acc, next) => Monoid[B].combine(acc, f(next)) }
 
-    def foldVia[F[_]](implicit iso: Iso[A, F[A]], mon: Monoid[F[A]]): A =
-      iso.unwrap(xs.map(iso.wrap).fold(mon.empty) { case (acc, next) => Monoid[F[A]].combine(acc, next) } )
+    def foldVia[F[_]](implicit iso: Iso[A, F[A]], mon: Monoid[F[A]]): A = iso.unwrap( xs.map(iso.wrap).foldAll )
   }
 }
