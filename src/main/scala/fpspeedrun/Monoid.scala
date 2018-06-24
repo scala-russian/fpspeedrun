@@ -1,5 +1,6 @@
 package fpspeedrun
 import fpspeedrun.Iso.{Wrapper, WrapperCompanion}
+import fpspeedrun.syntax.num._
 import fpspeedrun.syntax.semigroup._
 import simulacrum.typeclass
 
@@ -32,16 +33,20 @@ final case class Sum[T](value: T) extends AnyVal with Wrapper[T]
 
 object Sum extends WrapperCompanion[Sum] {
   implicit def sumMonoid[T: Num]: Monoid[Sum[T]] = new Monoid[Sum[T]] {
-    override def empty: Sum[T] = ???
+    override def empty: Sum[T] = Sum(zero)
 
-    override def combine(x: Sum[T], y: Sum[T]): Sum[T] = ???
+    override def combine(x: Sum[T], y: Sum[T]): Sum[T] = Sum(x.value plus y.value)
   }
 }
 
 final case class Prod[T](value: T) extends AnyVal with Wrapper[T]
 
 object Prod extends WrapperCompanion[Prod] {
-  implicit def prodMonoid[T: Num]: Monoid[Prod[T]] = ???
+  implicit def prodMonoid[T: Num]: Monoid[Prod[T]] = new Monoid[Prod[T]] {
+    override def empty: Prod[T] = Prod(one)
+
+    override def combine(x: Prod[T], y: Prod[T]): Prod[T] = Prod(x.value * y.value)
+  }
 }
 
 
