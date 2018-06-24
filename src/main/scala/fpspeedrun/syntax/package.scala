@@ -52,7 +52,7 @@ object monoid extends Monoid.ToMonoidOps {
 
   implicit class ListOps[A](val xs: List[A]) extends AnyVal{
     def foldAll(implicit mon: Monoid[A]): A = xs.foldLeft(mon.empty) { case (a, b) =>
-        mon.combine(a, b)
+      mon.combine(a, b)
     }
 
     def foldMap[B: Monoid](f: A => B): B = xs.map(f).foldAll
