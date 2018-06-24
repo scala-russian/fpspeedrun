@@ -2,6 +2,7 @@ package fpspeedrun
 import fpspeedrun.Iso.{Wrapper, WrapperCompanion}
 import simulacrum.typeclass
 import syntax.semigroup._
+import syntax.num._
 
 @typeclass
 trait Monoid[A] extends Semigroup[A] with Default[A]{
@@ -36,7 +37,7 @@ object Sum extends WrapperCompanion[Sum] {
   implicit def sumMonoid[T: Num]: Monoid[Sum[T]] = new Monoid[Sum[T]] {
     override def empty: Sum[T] = Sum(Num[T].zero)
 
-    override def combine(x: Sum[T], y: Sum[T]): Sum[T] = Sum(Num[T].plus(x.value, y.value))
+    override def combine(x: Sum[T], y: Sum[T]): Sum[T] = Sum(x.value + y.value)
   }
 }
 
@@ -46,7 +47,7 @@ object Prod extends WrapperCompanion[Prod] {
   implicit def prodMonoid[T: Num]: Monoid[Prod[T]] = new Monoid[Prod[T]] {
     override def empty: Prod[T] = Prod(Num[T].one)
 
-    override def combine(x: Prod[T], y: Prod[T]): Prod[T] = Prod(Num[T].times(x.value, y.value))
+    override def combine(x: Prod[T], y: Prod[T]): Prod[T] = Prod(x.value * y.value)
   }
 }
 
