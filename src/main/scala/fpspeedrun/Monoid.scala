@@ -21,19 +21,33 @@ object Monoid extends StdMonoidInstances[Monoid] {
 final case class Endo[A](run: A => A) extends AnyVal
 
 object Endo{
-  implicit def endoMonoid[A]: Monoid[Endo[A]] = ???
+  implicit def endoMonoid[A]: Monoid[Endo[A]] = new Monoid[Endo[A]] {
+    override def empty: Endo[A] = Endo(identity)
+
+    override def combine(x: Endo[A], y: Endo[A]): Endo[A] = {
+      Endo(x.run andThen y.run)
+    }
+  }
 }
 
 final case class Sum[T](value: T) extends AnyVal with Wrapper[T]
 
 object Sum extends WrapperCompanion[Sum] {
-  implicit def sumMonoid[T: Num]: Monoid[Sum[T]] = ???
+  implicit def sumMonoid[T: Num]: Monoid[Sum[T]] = new Monoid[Sum[T]] {
+    override def empty: Sum[T] = Sum(Num[T].zero)
+
+    override def combine(x: Sum[T], y: Sum[T]): Sum[T] = Sum(Num[T].plus(x.value, y.value))
+  }
 }
 
 final case class Prod[T](value: T) extends AnyVal with Wrapper[T]
 
 object Prod extends WrapperCompanion[Prod] {
-  implicit def prodMonoid[T: Num]: Monoid[Prod[T]] = ???
+  implicit def prodMonoid[T: Num]: Monoid[Prod[T]] = new Monoid[Prod[T]] {
+    override def empty: Prod[T] = Prod(Num[T].one)
+
+    override def combine(x: Prod[T], y: Prod[T]): Prod[T] = Prod(Num[T].times(x.value, y.value))
+  }
 }
 
 
@@ -48,5 +62,8 @@ trait StdMonoidInstances[TC[x] >: Monoid[x]] {
     override def combine(x: List[A], y: List[A]): List[A] = x ::: y
   }
 
-  final implicit def vectorMonoid[A]: TC[Vector[A]] = ???
+  final implicit def vectorMonoid[A]: TC[Vector[A]] = new Monoid[Vector[A]] {
+    override def empty: Vector[A] = Vector.empty
+    override def combine(x: Vector[A], y: Vector[A]): Vector[A] = x ++ y
+  }
 }
