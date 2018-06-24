@@ -38,7 +38,7 @@ object Calc extends StdCalcInstances[Calc] {
     go(x, calc.one, p)
   }
 
-  // TODO create the real FreeNum
+  // TODO create the real FreeCalc
   type Expr[A] = List[(Int, List[A])] //Sum of products
 
   //TODO implement this
@@ -48,15 +48,17 @@ object Calc extends StdCalcInstances[Calc] {
       override def instance[T]: Calc[Expr[T]] = new Calc[Expr[T]] {
         override def fromInt(x: Int): Expr[T] = List(x -> Nil)
         override def plus(x: Expr[T], y: Expr[T]): Expr[T] = x ::: y
-        override def times(x: Expr[T], y: Expr[T]): Expr[T] = x.flatMap {
-          case (k1, p1) => y.map {
-            case (k2, p2) => (k1 * k2) -> (p1 ::: p2)
+        override def times(x: Expr[T], y: Expr[T]): Expr[T] =
+          for {
+            (k1, p1) <- x
+            (k2, p2) <- y
+          } yield {
+            (k1 * k2) -> (p1 ::: p2)
           }
-        }
       }
       override def mapInterpret[A, B](fa: Expr[A])(f: A => B)(implicit instance: Calc[B]): B =
         fa.foldLeft(instance.zero) {
-          case (acc, (k, p)) => acc + (instance.fromInt(k) * p.map(f).foldLeft(instance.one)(_ * _))
+          case (acc, (k, p)) => acc + (instance.fromInt(k) * p.map(f).foldLeft(instance.one)(instance.times))
         }
     }
 }
