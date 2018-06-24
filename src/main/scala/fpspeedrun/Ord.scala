@@ -73,7 +73,12 @@ trait StdOrdInstances[TC[t] >: Ord[t]] extends StdNumInstances[TC]{
   final implicit val stringOrd: TC[String] = byOrdering
   final implicit def optionOrd[A: Ord]: TC[Option[A]] = new Ord[Option[A]] {
     override def compare(x: Option[A], y: Option[A]): Compare = {
-      Ord[Option[A]].compare(x, y)
+      (x, y) match {
+        case (Some(a), Some(b)) => Ord[A].compare(a, b)
+        case (None, None) => Ord.Compare.EQ
+        case (Some(_), None) => Ord.Compare.GT
+        case (None, Some(_)) => Ord.Compare.LT
+      }
     }
   }
 }
