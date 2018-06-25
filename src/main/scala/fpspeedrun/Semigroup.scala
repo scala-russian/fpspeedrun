@@ -11,13 +11,14 @@ trait Semigroup[T] extends Magma[T] {
 }
 
 object Semigroup extends StdSemigroupInstances[Semigroup]{
-  //TODO find the real type. Hint: search in cats something like FreeMonoid but little bit stricter
-  type FreeSemigrpoup[T] = Nothing
-  implicit val freeConstruct: FreeConstruct[Semigroup, FreeSemigrpoup] =
-    new FreeConstruct[Semigroup, FreeSemigrpoup] {
-      override def embed[T](x: T): FreeSemigrpoup[T] = ???
-      override def instance[T]: Semigroup[FreeSemigrpoup[T]] = ???
-      override def mapInterpret[A, B](fa: FreeSemigrpoup[A])(f: A => B)(implicit instance: Semigroup[B]): B = ???
+  type FreeSemigroup[T] = ::[T]
+  implicit val freeConstruct: FreeConstruct[Semigroup, FreeSemigroup] =
+    new FreeConstruct[Semigroup, FreeSemigroup] {
+      override def embed[T](x: T): FreeSemigroup[T] = ::[T](x, Nil)
+      override def instance[T]: Semigroup[FreeSemigroup[T]] =
+        (x: FreeSemigroup[T], y: FreeSemigroup[T]) => (x ++ y).asInstanceOf[::[T]]
+      override def mapInterpret[A, B](fa: FreeSemigroup[A])(f: A => B)(implicit instance: Semigroup[B]): B =
+        fa.map(f).reduce(instance.combine)
     }
 
 }

@@ -17,33 +17,48 @@ object Monoid extends StdMonoidInstances[Monoid]{
         for (x <- xo; y <- yo) yield x |+| y
     }
 
-  //TODO find the real type. Hint: look below
-  type FreeMonoid[A] = Nothing
+  type FreeMonoid[A] = List[A]
 
   implicit val freeMonoid: FreeConstruct[Monoid, FreeMonoid] =
     new FreeConstruct[Monoid, FreeMonoid] {
-      override def embed[T](x: T): FreeMonoid[T] = ???
-      override def instance[T]: Monoid[FreeMonoid[T]] = ???
-      override def mapInterpret[A, B](fa: FreeMonoid[A])(f: A => B)(implicit instance: Monoid[B]): B = ???
+      override def embed[T](x: T): FreeMonoid[T] = List(x)
+      override def instance[T]: Monoid[FreeMonoid[T]] = new Monoid[FreeMonoid[T]] {
+        override def empty: FreeMonoid[T] = List.empty
+
+        override def combine(x: FreeMonoid[T], y: FreeMonoid[T]): FreeMonoid[T] = x ++ y
+      }
+      override def mapInterpret[A, B](fa: FreeMonoid[A])(f: A => B)(implicit instance: Monoid[B]): B =
+        fa.map(f).fold(instance.empty)(instance.combine)
     }
 }
 
 final case class Endo[A](run: A => A) extends AnyVal
 
 object Endo {
-  implicit def endoMonoid[A]: Monoid[Endo[A]] = ???
+  implicit def endoMonoid[A]: Monoid[Endo[A]] = new Monoid[Endo[A]] {
+    def empty: Endo[A] = Endo[A]((x: A) => x)
+    def combine(x: Endo[A], y: Endo[A]): Endo[A] = Endo[A](x.run andThen y.run)
+  }
 }
 
 final case class Sum[T](value: T) extends AnyVal with Wrapper[T]
 
 object Sum extends WrapperCompanion[Sum] {
-  implicit def sumMonoid[T: Num]: Monoid[Sum[T]] = ???
+  implicit def sumMonoid[T: Num]: Monoid[Sum[T]] = new Monoid[Sum[T]] {
+    def empty: Sum[T] = wrapperIso[T].wrap(implicitly[Num[T]].fromInt(0))
+    def combine(x: Sum[T], y: Sum[T]): Sum[T] =
+      wrapperIso[T].wrap(implicitly[Num[T]].plus(wrapperIso[T].unwrap(x), wrapperIso[T].unwrap(y)))
+  }
 }
 
 final case class Prod[T](value: T) extends AnyVal with Wrapper[T]
 
 object Prod extends WrapperCompanion[Prod] {
-  implicit def prodMonoid[T: Num]: Monoid[Prod[T]] = ???
+  implicit def prodMonoid[T: Num]: Monoid[Prod[T]] = new Monoid[Prod[T]] {
+    def empty: Prod[T] = wrapperIso[T].wrap(implicitly[Num[T]].fromInt(1))
+    def combine(x: Prod[T], y: Prod[T]): Prod[T] =
+      wrapperIso[T].wrap(implicitly[Num[T]].times(wrapperIso[T].unwrap(x), wrapperIso[T].unwrap(y)))
+  }
 }
 
 trait StdMonoidInstances[TC[x] >: Monoid[x]] {
