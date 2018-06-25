@@ -1,6 +1,5 @@
 package fpspeedrun
 
-import fpspeedrun.Ord.Compare.{EQ, GT, LT}
 import simulacrum.{op, typeclass}
 
 import scala.annotation.tailrec
@@ -30,8 +29,6 @@ trait Calc[A] {
 
 object Calc extends StdCalcInstances[Calc] {
   import ops._
-  import syntax.eq._
-  import syntax.ord._
 
   def fastPow[A](x: A, p: Int)(implicit calc: Calc[A]): A = {
     @tailrec def go(p2: A, acc: A, p: Int): A =
@@ -44,25 +41,46 @@ object Calc extends StdCalcInstances[Calc] {
   type Degree = Int
   type Coefficient = Int
 
-  case class Monomial[A](coef: Coefficient, xs: List[(A, Degree)]) {
-    def *(num: Int): Monomial[A] = Monomial(coef * num, xs)
+  case class Term[A](x: A, degree: Degree)
 
-    def *(x: (A, Degree)): Monomial[A] =
-      Monomial(
-        coef,
-        if (xs.exists(_._1 == x._1)) xs.map { e => if (e._1 == x._1) (e._1, e._2 + x._2) else e }
-        else x :: xs
-      )
+  case class Monomial[A](coef: Coefficient, terms: List[Term[A]]) {
+    def *(num: Int): Monomial[A] = Monomial(coef * num, terms)
+
+    def *(term: Term[A]): Monomial[A] =
+      if (term.degree <= 0) Monomial(coef, terms)
+      else {
+        val merged = terms.partition(_.x == term.x) match {
+          case (Nil, _)      => term :: terms
+          case (List(t), ts) => Term(t.x, t.degree + term.degree) :: ts
+        }
+
+        Monomial(coef, merged)
+      }
 
     def *(that: Monomial[A]): Monomial[A] =
-      that.xs.foldLeft(Monomial(this.coef * that.coef, List[(A, Degree)]()))(_ * _)
+      that.terms.foldLeft(Monomial(coef * that.coef, terms))(_ * _)
+
+    def ~(that: Monomial[A]): Boolean = terms.toSet == that.terms.toSet
+
+    def ===(that: Monomial[A]): Boolean = (this ~ that) && (coef == that.coef)
   }
 
   object Monomial {
-    def apply[A](coef: Coefficient, xs: List[(A, Degree)]): Monomial[A] =
-      new Monomial(coef, if (coef == 0) List[(A, Degree)]() else xs.filter(_._2 > 0))
+    def apply[A](coef: Coefficient, terms: List[Term[A]]): Monomial[A] = {
+      if (coef == 0) new Monomial(0, Nil)
+      else {
+        val normalized =
+          terms
+            .filter(_.degree > 0)
+            .groupBy(_.x)
+            .map { case (x, list) => Term(x, list.map(_.degree).sum) }
+            .toList
 
-    implicit def monomialOrd[A]: Ord[Monomial[A]] =
+        new Monomial(coef, normalized)
+      }
+    }
+
+    /*implicit def monomialOrd[A]: Ord[Monomial[A]] =
       (a: Monomial[A], b: Monomial[A]) => {
         val degreesDiff =
           (a.xs.map(_._1) ++ b.xs.map(_._1))
@@ -71,44 +89,65 @@ object Calc extends StdCalcInstances[Calc] {
             .sum
 
         if (degreesDiff > 0) GT else if (degreesDiff < 0) LT else EQ
-      }
+      }*/
 
   }
 
-  case class Polynomial[A](monomials: List[Monomial[A]])(implicit mOrd: Ord[Monomial[A]]) {
+  case class Polynomial[A](monomials: List[Monomial[A]]) {
     def +(that: Polynomial[A]): Polynomial[A] = Polynomial(monomials ++ that.monomials)
 
     def *(that: Polynomial[A]): Polynomial[A] =
       Polynomial { for (xms <- this.monomials; yms <- that.monomials) yield xms * yms }
+
+    def ===(that: Polynomial[A]): Boolean = {
+      @tailrec def loop(target: List[Monomial[A]], source: List[Monomial[A]]): Boolean = {
+        source match {
+          case Nil       => target.isEmpty
+          case h :: tail => target.partition(_ === h) match {
+            case (Nil, _)       => false
+            case (_ :: Nil, ts) => loop(ts, tail)
+          }
+        }
+      }
+
+      loop(monomials, that.monomials)
+    }
   }
 
   object Polynomial {
-    def apply[A](m: List[Monomial[A]])(implicit mOrd: Ord[Monomial[A]]): Polynomial[A] =
-      new Polynomial(m.filterNot(_.coef == 0).sortWith { _ < _ })
+    def apply[A](ms: List[Monomial[A]]): Polynomial[A] = {
+      @tailrec def collect(target: List[Monomial[A]], source: List[Monomial[A]]): List[Monomial[A]] = {
+        source match {
+          case Nil       => target
+          case h :: tail => target.partition(_ ~ h) match {
+            case (Nil, _)       => collect(h :: target, tail)
+            case (t :: Nil, ts) => collect(Monomial(h.coef + t.coef, t.terms) :: ts, tail)
+          }
+        }
+      }
+
+      new Polynomial(collect(Nil, ms).filterNot(_.coef == 0))
+    }
   }
 
   type Expr[A] = Polynomial[A]
 
   implicit val freeCalc: FreeConstruct[Calc, Expr] =
     new FreeConstruct[Calc, Expr] {
-      override def embed[T](x: T): Expr[T] = Polynomial(Monomial(1, (x, 1) :: Nil) :: Nil)
+      override def embed[T](x: T): Expr[T] = Polynomial(Monomial(1, Term(x, 1) :: Nil) :: Nil)
 
-      override def instance[T]: Num[Expr[T]] = new Num[Expr[T]] {
-        override def fromInt(x: Coefficient): Expr[T] = Polynomial(Monomial(x, List[(T, Degree)]()) :: Nil)
+      override def instance[T]: Calc[Expr[T]] = new Calc[Expr[T]] {
+        override def fromInt(x: Coefficient): Expr[T] = Polynomial(Monomial(x, List[Term[T]]()) :: Nil)
 
         override def plus(x: Expr[T], y: Expr[T]): Expr[T] = x + y
 
         override def times(x: Expr[T], y: Expr[T]): Expr[T] = x * y
-
-        override def compare(x: Expr[T], y: Expr[T]): Ord.Compare =
-          (x.monomials zip y.monomials).collectFirst { case (a, b) if (a <=> b) =/= EQ => a <=> b }
-            .getOrElse(x.monomials.size <=> y.monomials.size)
       }
 
       override def mapInterpret[A, B](fa: Expr[A])(f: A => B)(implicit instance: Calc[B]): B =
         fa.monomials.map { m =>
             instance.fromInt(m.coef) *
-            m.xs.map { case (t, d) => (f(t), d) }
+            m.terms.map { t => (f(t.x), t.degree) }
               .foldLeft(instance.one)((acc, e) => acc * instance.pow(e._1, e._2))
         }.fold(instance.zero)(instance.plus)
     }
