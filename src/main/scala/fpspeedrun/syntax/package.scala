@@ -1,6 +1,8 @@
 package fpspeedrun.syntax
 import fpspeedrun._
 
+import scala.annotation.tailrec
+
 object eq extends Eq.ToEqOps
 
 object ord extends Ord.ToOrdOps
@@ -48,10 +50,15 @@ object semigroup extends Semigroup.ToSemigroupOps {
 
   implicit class FreeMagmaOps[T](val x: FreeMagma[T]) extends AnyVal {
     def reduceAll(implicit sg: Semigroup[T]): T = {
-      x match {
-        case Leaf(a) => a
-        case Branch(l, r) => l.reduceAll |+| r.reduceAll
-      }
+      @tailrec def reduceImpl(toVisit: List[FreeMagma[T]], acc: List[T]): List[T] =
+        if (toVisit.isEmpty) acc
+        else {
+          toVisit.head match {
+            case Leaf(v)      => reduceImpl(toVisit.tail, v :: acc)
+            case Branch(l, r) => reduceImpl(r :: l :: toVisit.tail, acc)
+          }
+        }
+      reduceImpl(x :: Nil, Nil).reduce(_ |+| _)
     }
   }
 }
