@@ -1,5 +1,5 @@
 package fpspeedrun
-import fpspeedrun.Iso.{Wrapper, WrapperCompanion}
+import fpspeedrun.Iso.{ Wrapper, WrapperCompanion }
 import simulacrum.typeclass
 import syntax.semigroup._
 
@@ -18,32 +18,44 @@ object Monoid extends StdMonoidInstances[Monoid]{
     }
 
   //TODO find the real type. Hint: look below
-  type FreeMonoid[A] = Nothing
+  type FreeMonoid[A] = List[A]
 
   implicit val freeMonoid: FreeConstruct[Monoid, FreeMonoid] =
     new FreeConstruct[Monoid, FreeMonoid] {
-      override def embed[T](x: T): FreeMonoid[T] = ???
-      override def instance[T]: Monoid[FreeMonoid[T]] = ???
-      override def mapInterpret[A, B](fa: FreeMonoid[A])(f: A => B)(implicit instance: Monoid[B]): B = ???
+      override def embed[T](x: T): FreeMonoid[T] = x :: Nil
+      override def instance[T]: Monoid[FreeMonoid[T]] = implicitly[Monoid[List[T]]]
+      override def mapInterpret[A, B](fa: FreeMonoid[A])(f: A => B)(implicit instance: Monoid[B]): B =
+        fa.map(f).fold(instance.empty)(instance.combine)
     }
 }
 
 final case class Endo[A](run: A => A) extends AnyVal
 
 object Endo {
-  implicit def endoMonoid[A]: Monoid[Endo[A]] = ???
+  implicit def endoMonoid[A]: Monoid[Endo[A]] =  new Monoid[Endo[A]] {
+    override def empty: Endo[A] = Endo(identity)
+    override def combine(x: Endo[A], y: Endo[A]): Endo[A] = Endo(x.run andThen y.run)
+  }
 }
 
 final case class Sum[T](value: T) extends AnyVal with Wrapper[T]
 
 object Sum extends WrapperCompanion[Sum] {
-  implicit def sumMonoid[T: Num]: Monoid[Sum[T]] = ???
+  import syntax.num._
+  implicit def sumMonoid[T: Num]: Monoid[Sum[T]] = new Monoid[Sum[T]] {
+    override def empty: Sum[T] = Sum(zero)
+    override def combine(x: Sum[T], y: Sum[T]): Sum[T] = Sum(x.value + y.value)
+  }
 }
 
 final case class Prod[T](value: T) extends AnyVal with Wrapper[T]
 
 object Prod extends WrapperCompanion[Prod] {
-  implicit def prodMonoid[T: Num]: Monoid[Prod[T]] = ???
+  import syntax.num._
+  implicit def prodMonoid[T: Num]: Monoid[Prod[T]] = new Monoid[Prod[T]] {
+    override def empty: Prod[T] = Prod(one)
+    override def combine(x: Prod[T], y: Prod[T]): Prod[T] = Prod(x.value * y.value)
+  }
 }
 
 trait StdMonoidInstances[TC[x] >: Monoid[x]] {
@@ -57,5 +69,8 @@ trait StdMonoidInstances[TC[x] >: Monoid[x]] {
     override def combine(x: List[A], y: List[A]): List[A] = x ::: y
   }
 
-  final implicit def vectorMonoid[A]: TC[Vector[A]] = ???
+  final implicit def vectorMonoid[A]: TC[Vector[A]] = new Monoid[Vector[A]] {
+    override def empty: Vector[A] = Vector.empty
+    override def combine(x: Vector[A], y: Vector[A]): Vector[A] = x ++ y
+  }
 }
