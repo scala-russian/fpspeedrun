@@ -27,8 +27,11 @@ trait Calc[A] {
   def pow(x: A, p: Int): A = Calc.fastPow(x, p)(this)
 }
 
-// TODO create the real FreeNum
-sealed trait Expr[A]
+sealed trait Expr[+A]
+final case class IntCoef(c: Int) extends Expr[Nothing]
+final case class Value[A](a: A) extends Expr[A]
+final case class Plus[A](l: Expr[A], r: Expr[A]) extends Expr[A]
+final case class Times[A](l: Expr[A], r: Expr[A]) extends Expr[A]
 
 object Calc extends StdCalcInstances[Calc] {
   import ops._
@@ -41,12 +44,25 @@ object Calc extends StdCalcInstances[Calc] {
     go(x, calc.one, p)
   }
 
-  //TODO implement this
   implicit val freeCalc: FreeConstruct[Calc, Expr] =
     new FreeConstruct[Calc, Expr] {
-      override def embed[T](x: T): Expr[T]                                                  = ???
-      override def instance[T]: Num[Expr[T]]                                                = ???
-      override def mapInterpret[A, B](fa: Expr[A])(f: A => B)(implicit instance: Calc[B]): B = ???
+      override def embed[T](x: T): Expr[T] = Value(x)
+      override def instance[T]: Calc[Expr[T]] = new Calc[Expr[T]] {
+        override def plus(x: Expr[T], y: Expr[T]): Expr[T] = Plus(x, y)
+        override def times(x: Expr[T], y: Expr[T]): Expr[T] = Times(x, y)
+        override def fromInt(x: Int): Expr[T] = IntCoef(x)
+      }
+      override def mapInterpret[A, B](fa: Expr[A])(f: A => B)(implicit instance: Calc[B]): B = {
+        def go(expr: Expr[A]): B = {
+          expr match {
+            case IntCoef(c)   => instance.fromInt(c)
+            case Value(a)     => f(a)
+            case Plus(l, r)   => go(l) + go(r)
+            case Times(l, r)  => go(l) * go(r)
+          }
+        }
+        go(fa)
+      }
     }
 }
 
