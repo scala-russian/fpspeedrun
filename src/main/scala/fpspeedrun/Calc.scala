@@ -27,12 +27,6 @@ trait Calc[A] {
   def pow(x: A, p: Int): A = Calc.fastPow(x, p)(this)
 }
 
-sealed trait Expr[+A]
-final case class IntCoef(c: Int) extends Expr[Nothing]
-final case class Value[A](a: A) extends Expr[A]
-final case class Plus[A](l: Expr[A], r: Expr[A]) extends Expr[A]
-final case class Times[A](l: Expr[A], r: Expr[A]) extends Expr[A]
-
 object Calc extends StdCalcInstances[Calc] {
   import ops._
 
@@ -44,25 +38,23 @@ object Calc extends StdCalcInstances[Calc] {
     go(x, calc.one, p)
   }
 
+  type Expr[A] = List[(Int, List[A])] // polynomial
+
   implicit val freeCalc: FreeConstruct[Calc, Expr] =
     new FreeConstruct[Calc, Expr] {
-      override def embed[T](x: T): Expr[T] = Value(x)
+      override def embed[T](x: T): Expr[T] = 1 -> List(x) :: Nil
       override def instance[T]: Calc[Expr[T]] = new Calc[Expr[T]] {
-        override def plus(x: Expr[T], y: Expr[T]): Expr[T] = Plus(x, y)
-        override def times(x: Expr[T], y: Expr[T]): Expr[T] = Times(x, y)
-        override def fromInt(x: Int): Expr[T] = IntCoef(x)
+        override def plus(x: Expr[T], y: Expr[T]): Expr[T] = x ::: y
+        override def times(x: Expr[T], y: Expr[T]): Expr[T] = for {
+          (xc, xp) <- x
+          (yc, yp) <- y
+        } yield (xc * yc) -> (xp ::: yp)
+        override def fromInt(x: Int): Expr[T] = List(x -> Nil)
       }
-      override def mapInterpret[A, B](fa: Expr[A])(f: A => B)(implicit instance: Calc[B]): B = {
-        def go(expr: Expr[A]): B = {
-          expr match {
-            case IntCoef(c)   => instance.fromInt(c)
-            case Value(a)     => f(a)
-            case Plus(l, r)   => go(l) + go(r)
-            case Times(l, r)  => go(l) * go(r)
-          }
+      override def mapInterpret[A, B](fa: Expr[A])(f: A => B)(implicit instance: Calc[B]): B =
+        fa.foldLeft(instance.zero) {
+          case (acc, (c, p)) => acc + (instance.fromInt(c) * p.map(f).reduce(_ * _))
         }
-        go(fa)
-      }
     }
 }
 
