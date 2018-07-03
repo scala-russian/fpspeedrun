@@ -45,16 +45,19 @@ object semigroup extends Semigroup.ToSemigroupOps {
     def first: First[T] = First(x)
     def last: Last[T] = Last(x)
   }
+
+  implicit class BinTreeOps[T](val x: BinTree[T]) extends AnyVal {
+    def mapReduceAll[B](f: T => B)(implicit sg: Semigroup[B]): B = Magma.freeMagma.mapInterpret(x)(f)
+    def reduceAll(implicit sg: Semigroup[T]): T = mapReduceAll(x => x)
+  }
 }
 
 object monoid extends Monoid.ToMonoidOps{
-  def empty[T: Monoid]: T = ???
+  def empty[T: Monoid]: T = Monoid[T].empty
 
   implicit class ListOps[A](val xs: List[A]) extends AnyVal{
-    def foldAll(implicit mon: Monoid[A]): A = ???
-
-    def foldMap[B: Monoid](f: A => B): B = ???
-
-    def foldVia[F[_]](implicit iso: Iso[A, F[A]], mon: Monoid[F[A]]): A = ???
+    def foldAll(implicit mon: Monoid[A]): A = xs.fold(empty)(mon.combine)
+    def foldMap[B: Monoid](f: A => B): B = xs.foldLeft(empty) { case (acc, next) => Monoid[B].combine(acc, f(next)) }
+    def foldVia[F[_]](implicit iso: Iso[A, F[A]], mon: Monoid[F[A]]): A = iso.unwrap( xs.map(iso.wrap).foldAll )
   }
 }

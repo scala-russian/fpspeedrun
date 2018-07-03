@@ -27,9 +27,6 @@ trait Calc[A] {
   def pow(x: A, p: Int): A = Calc.fastPow(x, p)(this)
 }
 
-// TODO create the real FreeNum
-sealed trait Expr[A]
-
 object Calc extends StdCalcInstances[Calc] {
   import ops._
 
@@ -41,12 +38,23 @@ object Calc extends StdCalcInstances[Calc] {
     go(x, calc.one, p)
   }
 
-  //TODO implement this
+  type Expr[A] = List[(Int, List[A])] // polynomial
+
   implicit val freeCalc: FreeConstruct[Calc, Expr] =
     new FreeConstruct[Calc, Expr] {
-      override def embed[T](x: T): Expr[T]                                                  = ???
-      override def instance[T]: Num[Expr[T]]                                                = ???
-      override def mapInterpret[A, B](fa: Expr[A])(f: A => B)(implicit instance: Calc[B]): B = ???
+      override def embed[T](x: T): Expr[T] = 1 -> List(x) :: Nil
+      override def instance[T]: Calc[Expr[T]] = new Calc[Expr[T]] {
+        override def plus(x: Expr[T], y: Expr[T]): Expr[T] = x ::: y
+        override def times(x: Expr[T], y: Expr[T]): Expr[T] = for {
+          (xc, xp) <- x
+          (yc, yp) <- y
+        } yield (xc * yc) -> (xp ::: yp)
+        override def fromInt(x: Int): Expr[T] = List(x -> Nil)
+      }
+      override def mapInterpret[A, B](fa: Expr[A])(f: A => B)(implicit instance: Calc[B]): B =
+        fa.foldLeft(instance.zero) {
+          case (acc, (c, p)) => acc + (instance.fromInt(c) * p.map(f).reduce(_ * _))
+        }
     }
 }
 
