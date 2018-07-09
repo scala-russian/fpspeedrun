@@ -10,10 +10,10 @@ trait Delay[A] {
 }
 
 sealed trait EvalDelayInstance{
-  implicit def evalDelay[A]: Delay[Eval[A]] = x => Eval.defer(x)
+  implicit def evalDelay[A]: Delay[Eval[A]] = ???
 }
 object Delay extends EvalDelayInstance {
-  implicit def dual[A](implicit delay: Delay[A]): Delay[Dual[A]] = x => Dual(delay.delay(x.getDual))
+  implicit def dual[A](implicit delay: Delay[A]): Delay[Dual[A]] = ???
 }
 
 
