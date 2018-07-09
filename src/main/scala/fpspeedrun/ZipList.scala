@@ -1,11 +1,13 @@
 package fpspeedrun
-import fpspeedrun.Ord.Compare.EQ
-import syntax.eq._
-import syntax.ord._
+import cats.{Eq, Monoid, Order, Semigroup}
 import syntax.num._
 import syntax.integ._
 import syntax.frac._
-import syntax.semigroup._
+import cats.syntax.order._
+import cats.instances.int._
+import cats.syntax.semigroup._
+import cats.instances.either._
+import cats.instances.list._
 
 trait ZipList[A] {
   def value: Either[A, List[A]]
@@ -42,7 +44,7 @@ object ZipList {
 
   implicit def zipListEq[A: Eq]: Eq[ZipList[A]] = _.value === _.value
 
-  implicit def zipListOrd[A: Ord]: Ord[ZipList[A]] = new ZipListOrd[A]
+  implicit def zipListOrd[A: Order]: Order[ZipList[A]] = new ZipListOrd[A]
 
   implicit def zipListNum[A: Num]: Num[ZipList[A]] = new ZipListNum[A]
 
@@ -50,14 +52,14 @@ object ZipList {
 
   implicit def zipListFrac[A: Frac]: Frac[ZipList[A]] = new ZipListFrac[A]
 
-  class ZipListOrd[A: Ord] extends Ord[ZipList[A]] {
-    override def compare(xs: ZipList[A], ys: ZipList[A]): Ord.Compare =
+  class ZipListOrd[A: Order] extends Order[ZipList[A]] {
+    override def compare(xs: ZipList[A], ys: ZipList[A]): Int =
       (xs, ys) match {
         case (Repeat(x), Repeat(y)) => x compare y
         case (Repeat(x), Finite(y)) =>
-          y.view.map(x compare _).find(_ =/= EQ).getOrElse(EQ)
+          y.view.map(x compare _).find(_ =!= 0).getOrElse(0)
         case (Finite(x), Repeat(y)) =>
-          x.view.map(_ compare y).find(_ =/= EQ).getOrElse(EQ)
+          x.view.map(_ compare y).find(_ =!= 0).getOrElse(0)
         case (Finite(x), Finite(y)) => x compare y
       }
   }

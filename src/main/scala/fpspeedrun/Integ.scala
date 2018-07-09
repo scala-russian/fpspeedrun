@@ -1,6 +1,6 @@
 package fpspeedrun
+import cats.kernel.Comparison.{EqualTo, GreaterThan, LessThan}
 import simulacrum.{op, typeclass}
-import fpspeedrun.Ord.Compare._
 
 import scala.annotation.tailrec
 
@@ -16,13 +16,13 @@ trait Integ[A] extends Num[A] {
   def rem(x: A, y: A): A = quotRem(x, y)._2
 
   @tailrec private def gcdRun(x: A, y: A): A =
-    if (equal(y, zero)) x
+    if (eqv(y, zero)) x
     else gcdRun(y, rem(x, y))
 
-  def gcd(x: A, y: A): A = compare(x, y) match {
-    case GT => gcdRun(x, y)
-    case EQ => x
-    case LT => gcdRun(y, x)
+  def gcd(x: A, y: A): A = comparison(x, y) match {
+    case GreaterThan => gcdRun(x, y)
+    case EqualTo     => x
+    case LessThan    => gcdRun(y, x)
   }
 
   def lcm(x: A, y: A): A = times(quot(x, gcd(x, y)), y)

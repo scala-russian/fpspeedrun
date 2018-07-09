@@ -1,9 +1,6 @@
 package fpspeedrun.syntax
 import fpspeedrun._
-
-object eq extends Eq.ToEqOps
-
-object ord extends Ord.ToOrdOps
+import fpspeedrun.foldables.Delay
 
 object num extends Num.ToNumOps {
   def zero[T: Num]: T = Num[T].zero
@@ -24,39 +21,8 @@ object ratio {
   }
 }
 
-object semigroup extends Semigroup.ToSemigroupOps {
-  implicit class ListOps[A](val xs: List[A]) extends AnyVal {
-    def reduceOpt(implicit sg: Semigroup[A]): Option[A] =
-      xs.reduceOption(sg.combine)
-
-    def reduceMapOpt[B](f: A => B)(implicit sg: Semigroup[B]): Option[B] =
-      xs match {
-        case Nil       => None
-        case x :: rest => Some(rest.foldLeft(f(x))((b, a) => b |+| f(a)))
-      }
-
-    def reduceOptVia[F[_]](implicit iso: Iso[A, F[A]], sg: Semigroup[F[A]]): Option[A] =
-      xs.reduceOption((x, y) => iso.unwrap(iso.wrap(x) |+| iso.wrap(y)))
-  }
-
-  implicit class SemigroupNewtypeOps[T](val x: T) extends AnyVal {
-    def sum: Sum[T]     = Sum(x)
-    def prod: Prod[T]   = Prod(x)
-    def first: First[T] = First(x)
-    def last: Last[T]   = Last(x)
-  }
-}
-
-object monoid extends Monoid.ToMonoidOps {
-  def empty[T: Monoid]: T = Monoid[T].empty
-
-  implicit class ListOps[A](val xs: List[A]) extends AnyVal {
-    import syntax.semigroup._
-    def foldAll(implicit mon: Monoid[A]): A = xs.foldLeft(mon.empty)(mon.combine)
-
-    def foldMap[B: Monoid](f: A => B): B = xs.view.map(f).foldLeft(empty[B])(_ |+| _)
-
-    def foldVia[F[_]](implicit iso: Iso[A, F[A]], mon: Monoid[F[A]]): A =
-      xs.foldLeft(iso.unwrap(empty[F[A]]))((x, y) => iso.unwrap(iso.wrap(x) |+| iso.wrap(y)))
+object delay extends Delay.ToDelayOps {
+  implicit class DelayOps[A](x: => A) {
+    def delay(implicit delay: Delay[A]): A = delay.delay(x)
   }
 }

@@ -1,1 +1,0 @@
-package object fpspeedrun extends RatioGenerators with EndoGenerators

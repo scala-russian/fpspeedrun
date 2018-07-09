@@ -1,10 +1,11 @@
 package fpspeedrun
+import cats.Order
 import simulacrum.{op, typeclass}
 
 import scala.annotation.tailrec
 
-@typeclass
-trait Num[A] extends Ord[A] {
+@typeclass(excludeParents = List("Order"))
+trait Num[A] extends Order[A] {
   def fromInt(x: Int): A
 
   @op("+", alias = true)
@@ -39,7 +40,11 @@ object Num extends StdNumInstances[Num] {
 
   def fromNumeric[A](implicit num: Numeric[A]): Num[A] = new FromNumeric[A]
 
-  class FromNumeric[A](implicit num: Numeric[A]) extends Ord.FromOrdering[A] with Num[A] {
+  class FromNumeric[A](implicit num: Numeric[A]) extends Num[A] {
+    override def compare(x: A, y: A): Int = {
+      val res = Ordering[A].compare(x, y)
+      res
+    }
     override def fromInt(x: Int): A   = num.fromInt(x)
     override def plus(x: A, y: A): A  = num.plus(x, y)
     override def times(x: A, y: A): A = num.times(x, y)

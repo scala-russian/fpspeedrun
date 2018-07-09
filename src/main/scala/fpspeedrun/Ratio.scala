@@ -2,8 +2,7 @@ package fpspeedrun
 
 import syntax.num._
 import syntax.integ._
-import syntax.eq._
-import syntax.ord._
+import cats.syntax.order._
 
 final case class Ratio[T] private (num: T, den: T) {
   override def toString = s"$num \\ $den"
@@ -26,7 +25,7 @@ object Ratio {
       make(x.num * y.den + x.den * y.num, x.den * y.den)
     override def times(x: Ratio[T], y: Ratio[T]): Ratio[T] =
       make(x.num * y.num, x.den * y.den)
-    override def compare(x: Ratio[T], y: Ratio[T]): Ord.Compare =
+    override def compare(x: Ratio[T], y: Ratio[T]): Int =
       x.num * y.den compare x.den * y.num
   }
 }
