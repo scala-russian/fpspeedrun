@@ -1,11 +1,9 @@
 package fpspeedrun
 package foldables
-import cats.{Eval, Foldable}
-import fpspeedrun.Num
-import fpspeedrun.syntax.num.zero
 import cats.syntax.foldable._
-import syntax.num._
-import FoldMapDelay.streamInstance
+import cats.{Eval, Foldable}
+import fpspeedrun.foldables.FoldMapDelay.streamInstance
+import fpspeedrun.syntax.num.{zero, _}
 
 
 object FoldMapDelayApp {
@@ -25,9 +23,8 @@ object FoldMapDelayApp {
       .value
 
   def main(args: Array[String]): Unit = {
-//    println(Eval.now(println("kek")).delay)
-    println(sum(Stream.range(0, 100000)))
-//    println(sum(Stream.range(0, 11).map{x => println(x); x * 2 + 1}))
+//    println(sum(Stream.range[BigInt](0, 100001)))
 //    println(sumN(5)(Stream.range(0, 11).map{x => println(x); x * 2 + 1}))
+//    println(sumN(10001)(Stream.from(0)))
   }
 }
