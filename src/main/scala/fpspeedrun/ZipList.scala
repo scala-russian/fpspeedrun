@@ -1,10 +1,10 @@
 package fpspeedrun
+import fpspeedrun.Ord.Compare
 import fpspeedrun.syntax.monoid
 import fpspeedrun.syntax.semigroup._
 import fpspeedrun.syntax.eq._
-import fpspeedrun.syntax.ord._
 
-sealed trait ZipList[A] {
+trait ZipList[A] {
   def value: Either[A, List[A]]
 
   def zipWith[B, C](that: ZipList[B])(f: (A, B) => C): ZipList[C]
@@ -38,17 +38,16 @@ object ZipList {
     override def combine(x: ZipList[A], y: ZipList[A]): ZipList[A] = x.zipWith(y)(_ |+| _)
   }
 
-  implicit def zipListEq[A: Eq]: Eq[ZipList[A]] = (x: ZipList[A], y: ZipList[A]) => (x, y) match {
-    case (Repeat(r1), Repeat(r2)) => r1 === r2
-    case (Finite(f1), Finite(f2)) => Eq.listEq[A].equal(f1, f2)
-    case _ => false
+  implicit def zipListEq[A: Eq]: Eq[ZipList[A]] = (x: ZipList[A], y: ZipList[A]) => x.zipWith(y)(_ === _).value match {
+    case Left(v) => v
+    case Right(list) => list.forall(b => b)
   }
 
-  implicit def zipListOrd[A: Ord]: Ord[ZipList[A]] = (x: ZipList[A], y: ZipList[A]) => (x, y) match {
-    case (Repeat(r1), Repeat(r2)) => r1 <=> r2
-    case (Finite(f1), Finite(f2)) => Ord.compareLists(f1, f2)
-    case (Repeat(r), Finite(f)) => Option(r) <=> f.headOption
-    case (Finite(f), Repeat(r)) => f.headOption <=> Option(r)
+  implicit def zipListOrd[A: Ord]: Ord[ZipList[A]] = (x: ZipList[A], y: ZipList[A]) => (x.value, y.value) match {
+    case (Left(v1), Left(v2)) => Ord[A].compare(v1, v2)
+    case (Right(r1), Right(r2)) => Ord[List[A]].compare(r1, r2)
+    case (Left(s), Right(l)) => l.find(v => v =/= s).map(Ord[A].compare(s, _)) getOrElse Compare.GT
+    case (Right(l), Left(s)) => l.find(v => v =/= s).map(Ord[A].compare(_, s)) getOrElse Compare.LT
   }
 
   implicit def zipListNum[A: Num]: Num[ZipList[A]] = new NumZipList[A]
@@ -70,9 +69,9 @@ object ZipList {
   }
 
   private class IntegZipList[A: Integ] extends NumZipList[A] with Integ[ZipList[A]]{
-    override def quotRem(x: ZipList[A], y: ZipList[A]): (ZipList[A], ZipList[A]) = x.zipWith(y)(Integ[A].quotRem) match {
-      case Repeat(s) => (Repeat(s._1), Repeat(s._2))
-      case Finite(l) => (Finite(l.map(_._1)), Finite(l.map(_._2)))
+    override def quotRem(x: ZipList[A], y: ZipList[A]): (ZipList[A], ZipList[A]) = x.zipWith(y)(Integ[A].quotRem).value match {
+      case Left(s) => (Repeat(s._1), Repeat(s._2))
+      case Right(l) => (Finite(l.map(_._1)), Finite(l.map(_._2)))
     }
   }
 
