@@ -31,10 +31,7 @@ object StreamFoldable2 extends Foldable2[Stream] {
   override def foldMapLazy[A, B: StreamFoldable2.LazyMonoid](fa: Stream[A])(f: A => Eval[B]): Eval[B] = {
     Eval.now(fa).flatMap { s =>
       val m = implicitly[StreamFoldable2.LazyMonoid[B]]
-      if (s.isEmpty)
-        m.empty
-      else
-        m.combine(f(s.head), Eval.defer(foldMapLazy(s.tail)(f)))
+      if (s.isEmpty) m.empty else m.combine(f(s.head), Eval.defer(foldMapLazy(s.tail)(f)))
     }
   }
 }
