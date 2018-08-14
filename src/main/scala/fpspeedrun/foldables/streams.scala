@@ -48,7 +48,7 @@ final case class FlatMap[F[_], X, G[_], A](fa: F[X], f: X => G[A])
 object FlatMap {
   implicit def foldable[F[_]: Foldable, X, G[_]: Foldable]: Foldable[FlatMap[F, X, G, ?]] = new Foldable[FlatMap[F, X, G, ?]] {
     override def foldLeft[A, B](fa: FlatMap[F, X, G, A], b: B)(f: (B, A) => B): B = {
-      fa.fa.foldLeft(b)((acc, x) => fa.f(x).foldl(acc)(f))
+      fa.fa.foldLeft(b)((acc, x) => fa.f(x).foldLeft(acc)(f))
     }
 
     override def foldRight[A, B](fa: FlatMap[F, X, G, A], lb: Eval[B])(f: (A, Eval[B]) => Eval[B]): Eval[B] = {
