@@ -2,6 +2,7 @@ package fpspeedrun.foldables
 
 import cats.{Eval, Foldable, Monoid}
 import fpspeedrun.foldables.LzEndo._
+import newts.Dual
 
 case class StringWrap[E](str: String)(implicit ev: Char =:= E) {
   def foldMap[B: Monoid](f: E => B): B = {
@@ -17,13 +18,16 @@ object StringWrap {
     }
 
     override def foldRight[A, B](fa: StringWrap[A], lb: Eval[B])(f: (A, Eval[B]) => Eval[B]): Eval[B] = {
-      fa.foldMap[LzEndo[B]](a => LzEndo(ev => f(a, ev))).run(lb)
+      fa.foldMap[Dual[LzEndo[B]]](a => Dual(LzEndo(ev => f(a, ev)))).getDual.run(lb)
     }
   }
 }
 
 
 //object Main3 extends App {
-//  require(StringWrap("asdqwe").foldLeft("") { (acc, v) => v + acc } == "ewqdsa")
-//  require(StringWrap("asdqwe").foldRight(Eval.now("")) { (v, acc) => acc.map(v + _) }.value == "ewqdsa")
+//  import StringWrap._
+//  import cats.syntax.foldable._
+//
+//  require(StringWrap("asdqwe").foldLeft("A") { (acc, v) => v + acc } == "ewqdsaA")
+//  require(StringWrap("asdqwe").foldRight(Eval.now("A")) { (v, acc) => acc.map(_ + v) }.value == "Aewqdsa")
 //}
