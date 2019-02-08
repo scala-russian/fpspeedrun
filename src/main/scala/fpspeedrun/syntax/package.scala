@@ -1,28 +1,25 @@
-package fpspeedrun.syntax
-import fpspeedrun._
+package fpspeedrun
+package syntax
+
+import cats.Functor
 import fpspeedrun.foldables.Delay
 
-object num extends Num.ToNumOps {
-  def zero[T: Num]: T = Num[T].zero
-  def one[T: Num]: T  = Num[T].one
-  implicit class IntNumOps(val x: Int) extends AnyVal {
-    def toNum[T](implicit num: Num[T]): T = num.fromInt(x)
-  }
-}
-
-object integ extends Integ.ToIntegOps
-
-object frac extends Frac.ToFracOps
-
-object ratio {
-  implicit class RatioOps[T](val x: T) extends AnyVal {
-    def \\(y: T)(implicit int: Integ[T]): Ratio[T] = Ratio.make(x, y)
-    def toRatio(implicit int: Integ[T]): Ratio[T]  = Ratio.make(x, int.one)
-  }
+object num extends Numeric.ExtraImplicits {
+  def zero[A](implicit A: Numeric[A]) = A.zero
+  def one[A](implicit A: Numeric[A]) = A.one
+  def fromInt[A](x: Int)(implicit A: Numeric[A]) = A.fromInt(x)
 }
 
 object delay extends Delay.ToDelayOps {
   implicit class DelayOps[A](x: => A) {
     def delay(implicit delay: Delay[A]): A = delay.delay(x)
   }
+}
+
+object functor extends Functor.ToFunctorOps {
+  implicit class FunctorFunctionOps[A, B](val f: A => B) extends AnyVal {
+    def <#>[F[_]](fa: F[A])(implicit F: Functor[F]): F[B] = ???
+  }
+
+
 }

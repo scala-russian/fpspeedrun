@@ -4,8 +4,8 @@ version := "mainrun-3"
 
 scalaVersion := "2.12.6"
 
-libraryDependencies += "org.typelevel" %% "cats-core" % "1.1.0"
-libraryDependencies += "org.typelevel" %% "cats-effect" % "1.0.0-RC2"
+libraryDependencies += "org.typelevel" %% "cats-core" % "1.4.0"
+libraryDependencies += "org.typelevel" %% "cats-effect" % "1.0.0"
 libraryDependencies += "com.github.mpilquist" %% "simulacrum" % "0.12.0"
 libraryDependencies += "com.github.julien-truffaut" %%  "newts-core"  % "0.3.2"
 
